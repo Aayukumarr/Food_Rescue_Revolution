@@ -1,0 +1,252 @@
+/* public/styles.css - Modern Responsive Styles for Food Rescue Revolution */
+
+:root {
+  --primary: #10b981;       /* Emerald Green */
+  --primary-hover: #059669;
+  --primary-light: #ecfdf5;
+  --secondary: #0ea5e9;     /* Sky Blue */
+  --accent: #f59e0b;        /* Amber */
+  --danger: #ef4444;        /* Red Emergency */
+  --dark: #0f172a;          /* Slate 900 */
+  --dark-surface: #1e293b;  /* Slate 800 */
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 50%, #f0f9ff 100%);
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  --card-hover-shadow: 0 20px 30px -10px rgba(16, 185, 129, 0.15), 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 1rem;
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Emergency Ticker */
+.ticker-wrap {
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(90deg, #dc2626 0%, #ea580c 100%);
+  color: white;
+  padding: 6px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.ticker-content {
+  display: inline-block;
+  white-space: nowrap;
+  animation: ticker 30s linear infinite;
+}
+@keyframes ticker {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Pulse animation for live markers */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.live-pulse {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: #10b981;
+  border-radius: 50%;
+  animation: pulse-ring 2s infinite;
+}
+
+.emergency-pulse {
+  animation: pulse-ring 1.5s infinite;
+  background-color: #ef4444;
+}
+
+/* Leaflet map container styling */
+#rescue-map {
+  width: 100%;
+  height: 480px;
+  border-radius: 1rem;
+  z-index: 10;
+  box-shadow: var(--card-shadow);
+}
+
+/* Custom Leaflet Map Pin Icons */
+.custom-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease;
+}
+.custom-pin:hover {
+  transform: scale(1.15);
+}
+.pin-available { background: #10b981; border: 2px solid #ffffff; }
+.pin-claimed { background: #f59e0b; border: 2px solid #ffffff; }
+.pin-in-transit { background: #8b5cf6; border: 2px solid #ffffff; }
+.pin-shelter { background: #0284c7; border: 2px solid #ffffff; }
+
+/* Food Card Design */
+.food-card {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: white;
+  box-shadow: var(--card-shadow);
+}
+.food-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-hover-shadow);
+  border-color: #cbd5e1;
+}
+
+/* Countdown Badges */
+.countdown-urgent {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  animation: pulse-border 1.5s infinite alternate;
+}
+.countdown-moderate {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.countdown-safe {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+@keyframes pulse-border {
+  from { border-color: #fca5a5; }
+  to { border-color: #ef4444; }
+}
+
+/* Impact Stat Counter Card */
+.stat-card {
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+.stat-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+}
+.stat-card.green::after { background: #10b981; }
+.stat-card.blue::after { background: #0284c7; }
+.stat-card.amber::after { background: #f59e0b; }
+.stat-card.purple::after { background: #8b5cf6; }
+
+/* Toast Notifications */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+.toast-msg {
+  pointer-events: auto;
+  min-width: 300px;
+  max-width: 420px;
+  background: white;
+  border-radius: 0.75rem;
+  padding: 14px 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-left: 5px solid #10b981;
+  animation: slide-in 0.3s ease-out forwards;
+}
+.toast-msg.emergency {
+  border-left-color: #ef4444;
+}
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Modals */
+.modal-overlay {
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+/* Responsive grid for listings */
+.listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}

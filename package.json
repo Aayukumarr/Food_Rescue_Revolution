@@ -1,0 +1,26 @@
+{
+  "name": "food-rescue-revolution",
+  "version": "1.0.0",
+  "description": "A full-stack platform connecting surplus food donors with NGOs, volunteers, and shelters to fight hunger and eliminate food waste.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node -e \"require('./db.js').seedDatabase()\"",
+    "test": "node --test tests/api.test.js"
+  },
+  "keywords": [
+    "food-rescue",
+    "zero-waste",
+    "sustainability",
+    "ngo",
+    "hunger-relief",
+    "food-redistribution",
+    "carbon-offset"
+  ],
+  "author": "Food Rescue Revolution Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
