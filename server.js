@@ -495,16 +495,29 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-// Start Server
+// Start Server with automatic port fallback if 3000 is occupied
 if (require.main === module) {
-  server.listen(PORT, () => {
+  let currentPort = Number(PORT);
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.warn(`⚠️ Port ${currentPort} is already in use. Retrying on port ${currentPort + 1}...`);
+      currentPort += 1;
+      server.listen(currentPort);
+    } else {
+      console.error('Server failed to start:', err);
+    }
+  });
+
+  server.listen(currentPort, () => {
     console.log(`\n======================================================`);
     console.log(`🌍 Food Rescue Revolution Platform`);
-    console.log(`🚀 Server running at: http://localhost:${PORT}`);
-    console.log(`📊 API Health:       http://localhost:${PORT}/api/health`);
-    console.log(`📦 SSE Live Stream:  http://localhost:${PORT}/api/events`);
+    console.log(`🚀 Server running at: http://localhost:${currentPort}`);
+    console.log(`📊 API Health:       http://localhost:${currentPort}/api/health`);
+    console.log(`📦 SSE Live Stream:  http://localhost:${currentPort}/api/events`);
     console.log(`======================================================\n`);
   });
 }
 
 module.exports = { server, db, broadcastEvent };
+

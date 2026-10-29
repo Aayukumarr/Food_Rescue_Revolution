@@ -1130,3 +1130,4 @@ window.triggerDatabaseReset = async function() {
     alert(err.message);
   }
 };
+

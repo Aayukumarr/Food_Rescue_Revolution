@@ -802,3 +802,4 @@ module.exports = {
 if (require.main === module) {
   seedDatabase();
 }
+
