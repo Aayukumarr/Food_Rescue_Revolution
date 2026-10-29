@@ -510,12 +510,23 @@ if (require.main === module) {
   });
 
   server.listen(currentPort, () => {
+    const url = `http://localhost:${currentPort}`;
     console.log(`\n======================================================`);
     console.log(`🌍 Food Rescue Revolution Platform`);
-    console.log(`🚀 Server running at: http://localhost:${currentPort}`);
-    console.log(`📊 API Health:       http://localhost:${currentPort}/api/health`);
-    console.log(`📦 SSE Live Stream:  http://localhost:${currentPort}/api/events`);
+    console.log(`🚀 Server running at: ${url}`);
+    console.log(`👉 Website Link:     ${url}  (Hold Cmd and Click)`);
+    console.log(`📊 API Health:       ${url}/api/health`);
+    console.log(`📦 SSE Live Stream:  ${url}/api/events`);
     console.log(`======================================================\n`);
+
+    // Auto-open browser in user's default browser (Mac: open, Windows: start, Linux: xdg-open)
+    if (process.env.AUTO_OPEN !== 'false') {
+      const { exec } = require('node:child_process');
+      const openCmd = process.platform === 'darwin' ? `open ${url}` : (process.platform === 'win32' ? `start ${url}` : `xdg-open ${url}`);
+      exec(openCmd, (err) => {
+        // Silently ignore if running in headless or sandbox environment
+      });
+    }
   });
 }
 
