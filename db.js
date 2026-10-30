@@ -273,6 +273,64 @@ class DatabaseManager {
     return this.getDonationById(id);
   }
 
+  deleteDonation(id) {
+    this.db.prepare(`DELETE FROM deliveries WHERE donation_id = ?`).run(id);
+    this.db.prepare(`DELETE FROM alerts WHERE donation_id = ?`).run(id);
+    this.db.prepare(`DELETE FROM donations WHERE id = ?`).run(id);
+    return { success: true };
+  }
+
+  updateUser(id, data = {}) {
+    const user = this.getUserById(id);
+    if (!user) return null;
+    const fields = [];
+    const params = [];
+    if (data.badge !== undefined) {
+      fields.push(`badge = ?`);
+      params.push(data.badge);
+    }
+    if (data.organization !== undefined) {
+      fields.push(`organization = ?`);
+      params.push(data.organization);
+    }
+    if (data.role !== undefined) {
+      fields.push(`role = ?`);
+      params.push(data.role);
+    }
+    if (fields.length > 0) {
+      params.push(id);
+      this.db.prepare(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`).run(...params);
+    }
+    return this.getUserById(id);
+  }
+
+  getDonorStats(donorId) {
+    const stats = this.db.prepare(`
+      SELECT 
+        COUNT(id) as total_listings,
+        COALESCE(SUM(servings), 0) as total_servings,
+        COALESCE(SUM(weight_kg), 0) as total_weight_kg,
+        COALESCE(SUM(CASE WHEN status = 'delivered' THEN servings ELSE 0 END), 0) as delivered_servings,
+        COALESCE(SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END), 0) as active_listings
+      FROM donations
+      WHERE donor_id = ?
+    `).get(donorId);
+    return stats;
+  }
+
+  getNgoStats(recipientId) {
+    const stats = this.db.prepare(`
+      SELECT 
+        COUNT(id) as total_claimed,
+        COALESCE(SUM(servings), 0) as total_servings_claimed,
+        COALESCE(SUM(CASE WHEN status = 'delivered' THEN servings ELSE 0 END), 0) as received_servings,
+        COALESCE(SUM(CASE WHEN status IN ('claimed', 'in_transit') THEN 1 ELSE 0 END), 0) as pending_deliveries
+      FROM donations
+      WHERE recipient_id = ?
+    `).get(recipientId);
+    return stats;
+  }
+
   // Delivery tracking
   createDelivery(del) {
     const stmt = this.db.prepare(`

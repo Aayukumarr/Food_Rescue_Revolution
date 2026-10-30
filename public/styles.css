@@ -47,6 +47,25 @@ body {
   background: #94a3b8;
 }
 
+/* Crucial display utility for dashboard switching */
+.hidden {
+  display: none !important;
+}
+
+/* Dashboard Tab Switchers */
+.dashboard-tab-btn {
+  cursor: pointer;
+  border: 1px solid transparent;
+  user-select: none;
+  white-space: nowrap;
+}
+.dashboard-tab-btn:hover {
+  transform: translateY(-1px);
+}
+.dashboard-tab-btn.active {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
 /* Glassmorphism Utilities */
 .glass-panel {
   background: rgba(255, 255, 255, 0.88);

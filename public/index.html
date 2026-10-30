@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Food Rescue Revolution - Zero Waste, Zero Hunger</title>
+  <title>Food Rescue Revolution - 3 Dedicated Dashboards</title>
   
   <!-- Tailwind CSS Play CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,7 +14,8 @@
           colors: {
             emerald: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857' },
             amber: { 50: '#fffbeb', 500: '#f59e0b', 600: '#d97706' },
-            sky: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7' }
+            sky: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7' },
+            indigo: { 50: '#eef2ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
           }
         }
       }
@@ -29,7 +30,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2.4">
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
@@ -37,452 +38,494 @@
   <div class="ticker-wrap flex items-center shadow-inner">
     <div class="px-4 py-1 bg-red-800 text-white font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5 shrink-0 z-10">
       <span class="emergency-pulse"></span>
-      Urgent Alerts
+      Urgent Network Alerts
     </div>
     <div id="global-alert-ticker" class="ticker-content font-medium text-xs">
-      Loading live alerts... Connecting to rescue network...
+      Connecting to Food Rescue Network... Live Sync active...
     </div>
   </div>
 
-  <!-- 2. Main Navigation Bar -->
-  <header class="glass-nav sticky top-0 z-50 shadow-sm">
+  <!-- 2. Main Navigation Bar with 3 Dedicated Dashboard Switches -->
+  <header class="glass-nav sticky top-0 z-50 shadow-sm border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
+      <div class="flex items-center justify-between h-20 gap-4">
         
         <!-- Brand Logo -->
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white text-xl shadow-md">
+        <div class="flex items-center gap-3 shrink-0">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white text-2xl shadow-md">
             🌱
           </div>
           <div>
             <div class="flex items-center gap-2">
               <span class="text-xl font-black tracking-tight text-slate-900">Food<span class="text-emerald-600">Rescue</span></span>
-              <span class="text-xs bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Revolution</span>
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Revolution</span>
             </div>
-            <p class="text-[11px] text-slate-500 font-medium hidden sm:block">Connecting Surplus Food to Hungry Hearts</p>
+            <p class="text-[11px] text-slate-500 font-medium">3 Integrated Portals: Donor • NGO • Admin</p>
           </div>
         </div>
 
-        <!-- Role Selector & Status -->
-        <div class="flex items-center gap-3 sm:gap-4">
-          <!-- Live Status -->
-          <div id="sse-status-badge" class="hidden md:flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
-            <span class="live-pulse"></span>
-            <span class="text-emerald-700 font-bold text-xs">Live Sync</span>
-          </div>
+        <!-- THE 3 DASHBOARD SWITCHER TABS -->
+        <div class="flex items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner overflow-x-auto">
+          <button id="tab-btn-donor" onclick="switchDashboard('donor')"
+                  class="dashboard-tab-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition duration-200 bg-white text-emerald-700 shadow-sm">
+            <span class="text-base">👨‍🍳</span>
+            <span>1. Donor Dashboard</span>
+            <span id="tab-lock-indicator-donor" class="text-xs ml-0.5" title="Security Status">🔒</span>
+            <span class="hidden md:inline text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-md font-semibold">Food Donors</span>
+          </button>
 
-          <!-- Active Role Switcher -->
-          <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 font-semibold hidden lg:inline">Active Role:</span>
-            <select id="role-select" class="text-xs sm:text-sm font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer">
-              <option value="donor">👨‍🍳 Donor (Chef Rajesh)</option>
-              <option value="recipient">🏛️ NGO / Shelter (Asha Home)</option>
-              <option value="volunteer">🛵 Volunteer Runner (Kabir Das)</option>
-              <option value="admin">🌐 Central Admin HQ</option>
-            </select>
-          </div>
+          <button id="tab-btn-ngo" onclick="switchDashboard('ngo')"
+                  class="dashboard-tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition duration-200 text-slate-600 hover:text-sky-700">
+            <span class="text-base">🏛️</span>
+            <span>2. NGO Dashboard</span>
+            <span id="tab-lock-indicator-ngo" class="text-xs ml-0.5" title="Security Status">🔒</span>
+            <span class="hidden md:inline text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded-md font-semibold">Shelters</span>
+          </button>
 
-          <!-- Quick Donate CTA -->
-          <button id="btn-open-donate-modal" onclick="openModal('modal-post-donation')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow hover:shadow-md transition flex items-center gap-1.5">
-            <span>+ Donate Food</span>
+          <button id="tab-btn-admin" onclick="switchDashboard('admin')"
+                  class="dashboard-tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition duration-200 text-slate-600 hover:text-indigo-700">
+            <span class="text-base">🛡️</span>
+            <span>3. Admin Dashboard</span>
+            <span id="tab-lock-indicator-admin" class="text-xs ml-0.5" title="Security Status">🔒</span>
+            <span class="hidden md:inline text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded-md font-semibold">Command HQ</span>
           </button>
         </div>
 
-      </div>
+        <!-- Live Sync Status & Active Portal Quick Logout -->
+        <div class="flex items-center gap-3">
+          <button id="header-portal-logout" onclick="portalLogout(event)"
+                  class="hidden bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer" title="Lock Active Portal">
+            <span id="header-logout-label">🔒 Logout</span>
+          </button>
+          <div class="hidden xl:flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+            <span class="live-pulse"></span>
+            <span class="text-emerald-800 font-bold text-xs">Live Sync Online</span>
+          </div>
+        </div>
 
-      <!-- Navigation Tabs -->
-      <nav class="flex space-x-1 sm:space-x-3 overflow-x-auto py-2 border-t border-slate-100 text-xs sm:text-sm font-semibold no-scrollbar">
-        <button data-target="section-marketplace" class="nav-tab active px-3 py-1.5 rounded-lg border-b-2 border-emerald-600 text-emerald-700 bg-emerald-50 transition flex items-center gap-1.5 shrink-0">
-          🍲 Surplus Marketplace
-        </button>
-        <button data-target="section-map" class="nav-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-emerald-700 transition flex items-center gap-1.5 shrink-0">
-          🗺️ Live Rescue Map
-        </button>
-        <button data-target="section-volunteer" class="nav-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-emerald-700 transition flex items-center gap-1.5 shrink-0">
-          🛵 Volunteer Missions
-        </button>
-        <button data-target="section-ngo" class="nav-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-emerald-700 transition flex items-center gap-1.5 shrink-0">
-          🏛️ NGO & Shelter Hub
-        </button>
-        <button data-target="section-impact" class="nav-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-emerald-700 transition flex items-center gap-1.5 shrink-0">
-          📊 Carbon & Impact
-        </button>
-        <button data-target="section-ai-advisor" class="nav-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-emerald-700 transition flex items-center gap-1.5 shrink-0">
-          🤖 AI Food Safety Advisor
-        </button>
-      </nav>
+      </div>
     </div>
   </header>
 
-  <!-- 3. Global Live Impact Counter Banner -->
-  <div class="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 text-white py-6 shadow-inner">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-        
-        <div class="stat-card bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10">
-          <div class="text-xs uppercase tracking-wider text-emerald-300 font-bold">Total Meals Rescued</div>
-          <div id="stat-meals-count" class="text-2xl sm:text-3xl font-black text-white mt-1">3,850</div>
-          <div class="text-[11px] text-emerald-200/80 mt-0.5">Fed to vulnerable families</div>
-        </div>
-
-        <div class="stat-card bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10">
-          <div class="text-xs uppercase tracking-wider text-teal-300 font-bold">Landfill Waste Diverted</div>
-          <div id="stat-waste-count" class="text-2xl sm:text-3xl font-black text-white mt-1">1,420</div>
-          <div class="text-[11px] text-teal-200/80 mt-0.5">Kilograms of wholesome food</div>
-        </div>
-
-        <div class="stat-card bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10">
-          <div class="text-xs uppercase tracking-wider text-sky-300 font-bold">CO2e Emissions Prevented</div>
-          <div id="stat-co2-count" class="text-2xl sm:text-3xl font-black text-white mt-1">3,550</div>
-          <div id="stat-trees-equiv" class="text-[11px] text-sky-200/80 mt-0.5">kg greenhouse gas averted</div>
-        </div>
-
-        <div class="stat-card bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10">
-          <div class="text-xs uppercase tracking-wider text-amber-300 font-bold">Freshwater Conserved</div>
-          <div id="stat-water-count" class="text-2xl sm:text-3xl font-black text-white mt-1">1,491,000</div>
-          <div class="text-[11px] text-amber-200/80 mt-0.5">Liters agricultural water saved</div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- 4. MAIN CONTENT CONTAINER -->
+  <!-- 3. MAIN DASHBOARDS CONTAINER -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- ==================== SECTION A: SURPLUS MARKETPLACE ==================== -->
-    <section id="section-marketplace" class="content-section">
-      <!-- Search & Filter Controls -->
-      <div class="glass-panel p-5 mb-8 shadow-sm">
-        <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
+    <!-- ========================================================================= -->
+    <!-- DASHBOARD 1: DONOR DASHBOARD ("Jo Donate Karega") -->
+    <!-- ========================================================================= -->
+    <div id="view-dashboard-donor" class="dashboard-view space-y-8">
+      
+      <!-- Donor Profile Banner -->
+      <div class="bg-gradient-to-r from-emerald-700 via-emerald-800 to-teal-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+        <div class="z-10">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+              👨‍🍳 Food Donor Portal (Restaurant & Banquet)
+            </span>
+            <span class="bg-amber-400 text-amber-950 text-xs font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              🌟 Verified Zero-Waste Partner
+            </span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight">The Grand Heritage Banquet & Hotel</h1>
+          <p class="text-emerald-100/90 text-sm mt-1">Logged in as: <strong>Chef Rajesh Sharma</strong> • Connaught Place, New Delhi</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 z-10">
+          <button onclick="openModal('modal-post-donation')"
+                  class="bg-white hover:bg-emerald-50 text-emerald-800 font-black text-sm px-5 py-3 rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center gap-2">
+            <span class="text-lg">➕</span>
+            <span>List Surplus Food Now</span>
+          </button>
           
-          <!-- Search input -->
-          <div class="relative flex-1">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">🔍</span>
-            <input id="filter-search" type="text" placeholder="Search by cuisine, dish name, hotel, or neighborhood..."
-                   class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm" />
-          </div>
+          <button onclick="openModal('modal-ai-advisor')"
+                  class="bg-emerald-600/50 hover:bg-emerald-600 text-white border border-emerald-400/40 font-bold text-xs sm:text-sm px-4 py-3 rounded-2xl backdrop-blur-md transition flex items-center gap-2">
+            <span>🤖</span>
+            <span>AI Shelf-Life Check</span>
+          </button>
 
-          <!-- Filters -->
-          <div class="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm">
-            
-            <select id="filter-category" class="px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm cursor-pointer">
-              <option value="all">All Categories</option>
-              <option value="cooked_meals">🍲 Cooked Meals</option>
-              <option value="bakery">🥖 Bakery & Breads</option>
-              <option value="fresh_produce">🥦 Fresh Produce</option>
-              <option value="dairy">🥛 Dairy</option>
-              <option value="packaged">📦 Packaged Foods</option>
-            </select>
+          <button onclick="openModal('modal-donor-change-password')"
+                  class="bg-emerald-900/60 hover:bg-emerald-800 text-emerald-200 border border-emerald-600/50 font-bold text-xs sm:text-sm px-3.5 py-3 rounded-2xl transition flex items-center gap-1.5 cursor-pointer">
+            <span>🔑 Password</span>
+          </button>
 
-            <select id="filter-food-type" class="px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm cursor-pointer">
-              <option value="all">All Dietary Types</option>
-              <option value="veg">🟢 Pure Vegetarian</option>
-              <option value="vegan">🌱 Vegan</option>
-              <option value="non_veg">🔴 Non-Vegetarian</option>
-            </select>
-
-            <select id="filter-status" class="px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm cursor-pointer">
-              <option value="all">All Statuses</option>
-              <option value="available" selected>Available Now</option>
-              <option value="claimed">Claimed</option>
-              <option value="in_transit">In Transit</option>
-              <option value="delivered">Delivered</option>
-            </select>
-
-          </div>
-
-        </div>
-
-        <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500">
-          <div id="donations-count-badge" class="font-bold text-slate-700">Loading listings...</div>
-          <div class="flex items-center gap-3">
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> &lt;3 hrs left</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> &lt;8 hrs left</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Fresh (&gt;8 hrs)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Listings Grid -->
-      <div id="donations-container" class="listings-grid">
-        <!-- Injected dynamically by app.js -->
-      </div>
-    </section>
-
-    <!-- ==================== SECTION B: LIVE RESCUE MAP ==================== -->
-    <section id="section-map" class="content-section hidden">
-      <div class="glass-panel p-6 mb-6 shadow-sm">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-          <div>
-            <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
-              <span>🗺️ Interactive Food Rescue & Shelter Map</span>
-            </h2>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1">Real-time geospatial tracking of surplus food batches, volunteer rescue riders, and shelter hubs.</p>
-          </div>
-          
-          <div class="flex items-center gap-3">
-            <button id="btn-locate-me" class="px-3 py-1.5 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg text-xs font-bold hover:bg-sky-100 transition flex items-center gap-1.5">
-              📍 Find Near Me
-            </button>
-            <select id="map-radius-filter" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none">
-              <option value="all">Radius: Metro Wide</option>
-              <option value="5">Within 5 km</option>
-              <option value="10">Within 10 km</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Leaflet Map Container -->
-        <div id="rescue-map"></div>
-
-        <!-- Map Legend -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-100 text-xs font-semibold text-slate-600">
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow"></span>
-            <span>Available Surplus</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full bg-amber-500 border-2 border-white shadow"></span>
-            <span>Claimed (Awaiting Pickup)</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full bg-purple-500 border-2 border-white shadow"></span>
-            <span>Volunteer In-Transit</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full bg-sky-600 border-2 border-white shadow"></span>
-            <span>Verified Shelter / NGO</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== SECTION C: VOLUNTEER MISSIONS ==================== -->
-    <section id="section-volunteer" class="content-section hidden">
-      <div class="max-w-4xl mx-auto">
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h2 class="text-2xl font-black text-slate-900">🛵 Volunteer Rescue Dispatch Center</h2>
-            <p class="text-sm text-slate-500 mt-1">Accept food transit missions, pick up surplus from kitchens, and safely deliver to partner shelters.</p>
-          </div>
-          <div class="text-right">
-            <span class="text-xs uppercase font-extrabold text-purple-700 bg-purple-100 px-3 py-1 rounded-full">Rapid Rescue Squad</span>
-          </div>
-        </div>
-
-        <div id="volunteer-deliveries-list">
-          <!-- Populated by app.js -->
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== SECTION D: NGO & SHELTER HUB ==================== -->
-    <section id="section-ngo" class="content-section hidden">
-      <div class="max-w-4xl mx-auto">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h2 class="text-2xl font-black text-slate-900">🏛️ NGO & Community Kitchen Hub</h2>
-            <p class="text-sm text-slate-500 mt-1">Claim surplus food batches, coordinate arrivals, and broadcast emergency meal needs.</p>
-          </div>
-          <button onclick="openModal('modal-aid-request')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2">
-            <span>📢 Request Urgent Food Aid</span>
+          <button id="btn-donor-logout" onclick="donorLogout(event)"
+                  class="bg-slate-900/80 hover:bg-rose-900 text-rose-300 border border-slate-700 font-bold text-xs sm:text-sm px-3.5 py-3 rounded-2xl transition flex items-center gap-1.5 cursor-pointer shadow hover:shadow-md" title="Lock Donor Portal">
+            <span>🔒 Logout</span>
           </button>
         </div>
 
-        <div class="glass-panel p-6 mb-8">
-          <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
-            <span>🚨 Active Community Aid Broadcasts</span>
-          </h3>
-          <div id="aid-requests-list">
-            <!-- Populated by app.js -->
-          </div>
+        <!-- Decorative background shapes -->
+        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      </div>
+
+      <!-- Donor KPI Metrics Grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="stat-card green bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs uppercase font-extrabold text-slate-500">Total Meals Rescued</div>
+          <div id="donor-kpi-meals" class="text-3xl font-black text-emerald-600 mt-1">1,450</div>
+          <div class="text-xs text-slate-500 mt-1">Nutritious meals served</div>
+        </div>
+
+        <div class="stat-card blue bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs uppercase font-extrabold text-slate-500">Food Diverted (kg)</div>
+          <div id="donor-kpi-weight" class="text-3xl font-black text-sky-600 mt-1">580 kg</div>
+          <div class="text-xs text-slate-500 mt-1">Diverted from landfill</div>
+        </div>
+
+        <div class="stat-card amber bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs uppercase font-extrabold text-slate-500">CO2e Emissions Saved</div>
+          <div id="donor-kpi-co2" class="text-3xl font-black text-amber-600 mt-1">1,450 kg</div>
+          <div class="text-xs text-slate-500 mt-1">Greenhouse gas averted</div>
+        </div>
+
+        <div class="stat-card purple bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs uppercase font-extrabold text-slate-500">Active Surplus Batches</div>
+          <div id="donor-kpi-active" class="text-3xl font-black text-purple-600 mt-1">2 Active</div>
+          <div class="text-xs text-slate-500 mt-1">In rescue pipeline</div>
         </div>
       </div>
-    </section>
 
-    <!-- ==================== SECTION E: CARBON & IMPACT ANALYTICS ==================== -->
-    <section id="section-impact" class="content-section hidden">
-      <div class="space-y-8">
-        
-        <div>
-          <h2 class="text-2xl font-black text-slate-900">📊 Environmental Impact & Carbon Avoidance</h2>
-          <p class="text-sm text-slate-500 mt-1">Measurable carbon sequestration, water preservation, and hunger relief metrics.</p>
-        </div>
-
-        <!-- Charts Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="lg:col-span-2 glass-panel p-6">
-            <h3 class="font-bold text-slate-800 mb-4 flex items-center justify-between">
-              <span>Rescued Meals & Carbon Reduction Trend</span>
-              <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">6-Month Trend</span>
-            </h3>
-            <canvas id="chart-impact-trend" height="130"></canvas>
-          </div>
-
-          <div class="glass-panel p-6">
-            <h3 class="font-bold text-slate-800 mb-4">Surplus Categories Diverted</h3>
-            <canvas id="chart-category-doughnut" height="200"></canvas>
-          </div>
-        </div>
-
-        <!-- Leaderboards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Top Donors -->
-          <div class="glass-panel p-6">
-            <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
-              <span>🌟 Top Donor Heroes (Zero-Waste Certified)</span>
-            </h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-sm">
-                <thead>
-                  <tr class="text-slate-400 text-xs uppercase border-b border-slate-100">
-                    <th class="pb-2">Rank</th>
-                    <th class="pb-2">Organization</th>
-                    <th class="pb-2">Meals Rescued</th>
-                    <th class="pb-2">Rating</th>
-                  </tr>
-                </thead>
-                <tbody id="leaderboard-donors-body">
-                  <!-- Populated by app.js -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Top Volunteers -->
-          <div class="glass-panel p-6">
-            <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
-              <span>⚡ Top Volunteer Rescuers</span>
-            </h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-sm">
-                <thead>
-                  <tr class="text-slate-400 text-xs uppercase border-b border-slate-100">
-                    <th class="pb-2">Rank</th>
-                    <th class="pb-2">Volunteer</th>
-                    <th class="pb-2">Missions Done</th>
-                    <th class="pb-2">Rating</th>
-                  </tr>
-                </thead>
-                <tbody id="leaderboard-volunteers-body">
-                  <!-- Populated by app.js -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ==================== SECTION F: AI FOOD SAFETY ADVISOR ==================== -->
-    <section id="section-ai-advisor" class="content-section hidden">
-      <div class="max-w-4xl mx-auto">
-        <div class="mb-6">
-          <h2 class="text-2xl font-black text-slate-900">🤖 Smart Food Safety & Urgency Advisor</h2>
-          <p class="text-sm text-slate-500 mt-1">HACCP-compliant shelf life calculator and dynamic urgency estimator for safe surplus distribution.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          <!-- Input Form -->
-          <div class="glass-panel p-6">
-            <h3 class="font-bold text-slate-800 text-base mb-4">Calculate Safety Parameters</h3>
-            
-            <form id="advisor-calc-form" class="space-y-4">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Food Category</label>
-                <select id="adv-category" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                  <option value="cooked_meals">Cooked Meals (Rice, Curry, Gravies)</option>
-                  <option value="bakery">Baked Goods & Bread</option>
-                  <option value="fresh_produce">Fresh Fruits & Vegetables</option>
-                  <option value="dairy">Dairy Products (Paneer, Milk, Curd)</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Food Type</label>
-                <select id="adv-food-type" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                  <option value="veg">Vegetarian</option>
-                  <option value="non_veg">Non-Vegetarian (Poultry / Meat)</option>
-                  <option value="vegan">Pure Vegan</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Time Elapsed Since Preparation (Hours)</label>
-                <input id="adv-hours-ago" type="number" step="0.5" min="0" max="24" value="1.5" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Storage Condition</label>
-                <select id="adv-storage" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                  <option value="room_temperature">Ambient Room Temperature (Unrefrigerated)</option>
-                  <option value="hot_insulated">Hot Insulated Carriers (&gt;65°C)</option>
-                  <option value="refrigerated">Cold Storage / Chilled (&lt;4°C)</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ambient Temperature (°C)</label>
-                <input id="adv-temp" type="number" min="5" max="50" value="28" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
-              </div>
-
-              <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow transition">
-                ⚡ Analyze Safety & Urgency Score
-              </button>
-            </form>
-          </div>
-
-          <!-- Advisor Output Display -->
-          <div id="advisor-results" class="glass-panel p-6 flex flex-col justify-between">
+      <!-- Shelter Urgent Needs Alert (Direct Fulfill Radar) -->
+      <div class="bg-amber-50 border border-amber-200 rounded-3xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">📢</span>
             <div>
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-slate-800 text-base">HACCP Safety Assessment</h3>
-                <span id="adv-urgency-badge" class="bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded text-xs">NORMAL</span>
-              </div>
-
-              <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
-                  <div class="text-xs text-emerald-700 font-bold uppercase">Safety Index</div>
-                  <div id="adv-score-val" class="text-2xl font-black text-emerald-700 mt-1">92/100</div>
-                </div>
-                <div class="bg-sky-50 border border-sky-100 rounded-xl p-3 text-center">
-                  <div class="text-xs text-sky-700 font-bold uppercase">Safe Window</div>
-                  <div id="adv-hours-remaining" class="text-2xl font-black text-sky-700 mt-1">4.2 Hours Safe</div>
-                </div>
-              </div>
-
-              <div class="space-y-3">
-                <h4 class="text-xs font-extrabold uppercase text-slate-500">Distribution Guidelines:</h4>
-                <ul id="adv-guidelines-list" class="text-xs sm:text-sm text-slate-700 space-y-1.5 list-disc pl-4">
-                  <li>Surplus food within acceptable critical control limits.</li>
-                  <li>Ensure insulated lids are sealed tightly during transit.</li>
-                </ul>
-              </div>
-            </div>
-
-            <div class="mt-6 pt-4 border-t border-slate-100 text-xs text-slate-400">
-              Verified with FSSAI & Codex Alimentarius Surplus Redistribution Safety Guidelines.
+              <h3 class="text-base font-extrabold text-amber-950">Nearby Shelters Urgently Requesting Meals Tonight</h3>
+              <p class="text-xs text-amber-800">Directly fulfill food shortages at local partner orphanages and food banks.</p>
             </div>
           </div>
-
+          <span class="text-xs font-bold bg-amber-200/80 text-amber-900 px-3 py-1 rounded-full">Urgent Relief Radar</span>
+        </div>
+        <div id="donor-shelter-requests-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Populated by app.js -->
         </div>
       </div>
-    </section>
+
+      <!-- Donor's Live Food Listings -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
+              <span>🍲 My Food Donation Listings & Live Status</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Track surplus food from kitchen dispatch until safe delivery at recipient shelter.</p>
+          </div>
+          <button onclick="openModal('modal-post-donation')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow transition">
+            + Add Another Donation
+          </button>
+        </div>
+
+        <div id="donor-my-donations-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- DASHBOARD 2: NGO / SHELTER DASHBOARD ("Enjio Ka") -->
+    <!-- ========================================================================= -->
+    <div id="view-dashboard-ngo" class="dashboard-view space-y-8 hidden">
+      
+      <!-- NGO Profile Banner -->
+      <div class="bg-gradient-to-r from-sky-700 via-sky-800 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+        <div class="z-10">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="bg-sky-500/30 text-sky-200 border border-sky-400/30 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+              🏛️ NGO & Shelter Portal
+            </span>
+            <span class="bg-emerald-400 text-emerald-950 text-xs font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              🛡️ Verified Relief Beneficiary
+            </span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight">Asha Child Hope Home & Orphanage</h1>
+          <p class="text-sky-100/90 text-sm mt-1">Directed by: <strong>Sister Mary Teresa</strong> • Lodhi Road Community Center • 120 Children Under Care</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 z-10">
+          <button onclick="openModal('modal-aid-request')"
+                  class="bg-red-600 hover:bg-red-700 text-white font-black text-sm px-5 py-3 rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center gap-2">
+            <span class="text-lg">📢</span>
+            <span>Request Urgent Food Aid</span>
+          </button>
+
+          <button onclick="document.getElementById('ngo-available-food-section').scrollIntoView({ behavior: 'smooth' })"
+                  class="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs sm:text-sm px-4 py-3 rounded-2xl backdrop-blur-md transition">
+            🍲 Browse Surplus Food
+          </button>
+
+          <button onclick="openModal('modal-ngo-change-password')"
+                  class="bg-sky-900/60 hover:bg-sky-800 text-sky-200 border border-sky-600/50 font-bold text-xs sm:text-sm px-3.5 py-3 rounded-2xl transition flex items-center gap-1.5 cursor-pointer">
+            <span>🔑 Password</span>
+          </button>
+
+          <button id="btn-ngo-logout" onclick="ngoLogout(event)"
+                  class="bg-slate-900/80 hover:bg-rose-900 text-rose-300 border border-slate-700 font-bold text-xs sm:text-sm px-3.5 py-3 rounded-2xl transition flex items-center gap-1.5 cursor-pointer shadow hover:shadow-md" title="Lock NGO Portal">
+            <span>🔒 Logout</span>
+          </button>
+        </div>
+
+        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      </div>
+
+      <!-- NGO KPI Metrics Grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="stat-card sky bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs uppercase font-extrabold text-slate-500">Meals Received</div>
+          <div id="ngo-kpi-received" class="text-3xl font-black text-sky-600 mt-1">2,100</div>
+          <div class="text-xs text-slate-500 mt-1">Fresh meals distributed</div>
+        </div>
+
+        <div class="stat-card amber bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs uppercase font-extrabold text-slate-500">Pending Deliveries</div>
+          <div id="ngo-kpi-pending" class="text-3xl font-black text-amber-600 mt-1">2 Inbound</div>
+          <div class="text-xs text-slate-500 mt-1">On the way to shelter</div>
+        </div>
+
+        <div class="stat-card green bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs uppercase font-extrabold text-slate-500">Children Nourished</div>
+          <div class="text-3xl font-black text-emerald-600 mt-1">120 Kids</div>
+          <div class="text-xs text-slate-500 mt-1">Daily evening meals</div>
+        </div>
+
+        <div class="stat-card purple bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-xs uppercase font-extrabold text-slate-500">Our Security Handover OTP</div>
+          <div class="text-2xl font-black font-mono text-purple-700 mt-1">Verified OTP</div>
+          <div class="text-xs text-slate-500 mt-1">Share with volunteer at gate</div>
+        </div>
+      </div>
+
+      <!-- NGO's Claimed & Incoming Food Pipeline (With Handover OTP Codes!) -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
+              <span>🚚 My Inbound Food Deliveries & OTP Handover</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Food claimed by your shelter. Share the 4-digit OTP with the volunteer rider to verify delivery.</p>
+          </div>
+          <span class="text-xs font-extrabold bg-sky-100 text-sky-800 px-3 py-1 rounded-full">Incoming Pipeline</span>
+        </div>
+
+        <div id="ngo-incoming-deliveries-list" class="space-y-4">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+      <!-- Available Surplus Food Feed (NGO Claiming Section) -->
+      <div id="ngo-available-food-section" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
+              <span>🍲 Fresh Surplus Food Available for Claiming</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Click "Claim for Our Shelter" to immediately schedule volunteer pickup.</p>
+          </div>
+
+          <!-- Quick Filters -->
+          <div class="flex items-center gap-2 text-xs">
+            <select id="ngo-filter-diet" onchange="renderNgoDashboard()" class="px-3 py-2 rounded-xl border border-slate-200 bg-white font-semibold">
+              <option value="all">All Dietary</option>
+              <option value="veg">🟢 Pure Veg Only</option>
+              <option value="vegan">🌱 Vegan Only</option>
+              <option value="non_veg">🔴 Non-Veg</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="ngo-available-donations-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- DASHBOARD 3: ADMIN COMMAND CENTER ("Admin Ka") -->
+    <!-- ========================================================================= -->
+    <div id="view-dashboard-admin" class="dashboard-view space-y-8 hidden">
+      
+      <!-- Admin Profile Banner -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+        <div class="z-10">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="bg-indigo-500/30 text-indigo-300 border border-indigo-400/30 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+              🛡️ Central Admin Command Center
+            </span>
+            <span class="bg-emerald-400 text-emerald-950 text-xs font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              ⚡ Full System Governance
+            </span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight">Food Rescue Revolution HQ</h1>
+          <p class="text-slate-300 text-sm mt-1">Central Metro Dispatch Coordinator • Real-Time Oversight of All Donors & Shelters</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 z-10">
+          <button onclick="openModal('modal-admin-broadcast')"
+                  class="bg-red-600 hover:bg-red-700 text-white font-black text-xs sm:text-sm px-3.5 py-2.5 rounded-xl shadow transition flex items-center gap-2">
+            <span>🚨 Broadcast Red Alert</span>
+          </button>
+
+          <button onclick="openModal('modal-change-password')"
+                  class="bg-indigo-900/80 hover:bg-indigo-800 text-indigo-200 border border-indigo-700 font-bold text-xs sm:text-sm px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5">
+            <span>🔑 Password</span>
+          </button>
+
+          <button id="btn-admin-logout" onclick="adminLogout(event)"
+                  class="bg-slate-800 hover:bg-rose-900 text-rose-300 border border-slate-700 font-bold text-xs sm:text-sm px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow hover:shadow-md" title="Lock Admin Portal">
+            <span>🔒 Logout</span>
+          </button>
+
+          <button onclick="triggerDatabaseReset()"
+                  class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold text-xs sm:text-sm px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5">
+            <span>↺ Reset DB</span>
+          </button>
+        </div>
+
+        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      </div>
+
+      <!-- Admin System-Wide KPIs -->
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="stat-card green bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+          <div class="text-[11px] uppercase font-extrabold text-slate-500">Network Rescued Meals</div>
+          <div id="admin-kpi-meals" class="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">3,850</div>
+          <div class="text-[10px] text-slate-400">Total fed</div>
+        </div>
+
+        <div class="stat-card blue bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+          <div class="text-[11px] uppercase font-extrabold text-slate-500">Landfill Diverted</div>
+          <div id="admin-kpi-weight" class="text-2xl sm:text-3xl font-black text-sky-600 mt-1">1,420 kg</div>
+          <div class="text-[10px] text-slate-400">Zero food waste</div>
+        </div>
+
+        <div class="stat-card amber bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+          <div class="text-[11px] uppercase font-extrabold text-slate-500">CO2e Prevented</div>
+          <div id="admin-kpi-co2" class="text-2xl sm:text-3xl font-black text-amber-600 mt-1">3,550 kg</div>
+          <div class="text-[10px] text-slate-400">Climate benefit</div>
+        </div>
+
+        <div class="stat-card purple bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+          <div class="text-[11px] uppercase font-extrabold text-slate-500">Active Missions</div>
+          <div id="admin-kpi-active-missions" class="text-2xl sm:text-3xl font-black text-purple-600 mt-1">4 Active</div>
+          <div class="text-[10px] text-slate-400">Surplus in motion</div>
+        </div>
+
+        <div class="stat-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center col-span-2 lg:col-span-1">
+          <div class="text-[11px] uppercase font-extrabold text-slate-500">Registered Partners</div>
+          <div id="admin-kpi-users-count" class="text-2xl sm:text-3xl font-black text-slate-800 mt-1">10 Entities</div>
+          <div class="text-[10px] text-slate-400">Donors + NGOs</div>
+        </div>
+      </div>
+
+      <!-- Real-Time Geospatial Map Container -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
+              <span>🗺️ Live Metro Operations & Routing Map</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Real-time geospatial distribution: Green (Donors), Orange (Claimed), Blue (Shelters).</p>
+          </div>
+          <button id="btn-locate-me" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 transition">
+            📍 Locate Center
+          </button>
+        </div>
+        <div id="rescue-map"></div>
+      </div>
+
+      <!-- Charts: Rescued Growth & Category Breakdown -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+          <h3 class="text-base font-extrabold text-slate-800 mb-3 flex items-center justify-between">
+            <span>Rescue Growth & Carbon Offset Trend</span>
+            <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Real-Time Data</span>
+          </h3>
+          <canvas id="chart-impact-trend" height="120"></canvas>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+          <h3 class="text-base font-extrabold text-slate-800 mb-3">Surplus Food Categories</h3>
+          <canvas id="chart-category-doughnut" height="180"></canvas>
+        </div>
+      </div>
+
+      <!-- Admin Control Tables -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Table 1: All Food Donations Management -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+              <span>🍲 Master Donations Registry</span>
+            </h3>
+            <span class="text-xs text-slate-500 font-bold" id="admin-donations-count-badge">Loading...</span>
+          </div>
+
+          <div class="overflow-x-auto max-h-96">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 uppercase sticky top-0">
+                <tr>
+                  <th class="p-2.5">Item</th>
+                  <th class="p-2.5">Donor</th>
+                  <th class="p-2.5">Servings</th>
+                  <th class="p-2.5">Status</th>
+                  <th class="p-2.5 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-donations-table-body" class="divide-y divide-slate-100">
+                <!-- Populated by app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Table 2: User Verification & Partner Management -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+              <span>👥 Partner Organizations & Verification</span>
+            </h3>
+            <span class="text-xs text-slate-500 font-bold">10 Registered</span>
+          </div>
+
+          <div class="overflow-x-auto max-h-96">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 uppercase sticky top-0">
+                <tr>
+                  <th class="p-2.5">Entity</th>
+                  <th class="p-2.5">Role</th>
+                  <th class="p-2.5">Impact</th>
+                  <th class="p-2.5">Badge</th>
+                  <th class="p-2.5 text-right">Verify</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-table-body" class="divide-y divide-slate-100">
+                <!-- Populated by app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
 
   </main>
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- Modal 1: Post Surplus Food (Donor) -->
+  <!-- Modal 1: Post Surplus Food (Donor Form) -->
   <div id="modal-post-donation" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl overflow-y-auto max-h-[90vh] border border-slate-100">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl overflow-y-auto max-h-[90vh] border border-slate-100">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
         <div class="flex items-center gap-2">
-          <span class="text-2xl">🍲</span>
-          <h3 class="text-lg font-bold text-slate-900">List Surplus Food for Rescue</h3>
+          <span class="text-2xl">👨‍🍳</span>
+          <div>
+            <h3 class="text-lg font-black text-slate-900">List Surplus Food (Donor Portal)</h3>
+            <p class="text-xs text-slate-500">Your listing will immediately notify nearby shelters and volunteers.</p>
+          </div>
         </div>
         <button onclick="closeModal('modal-post-donation')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
       </div>
@@ -517,13 +560,13 @@
 
         <div class="grid grid-cols-3 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Servings *</label>
-            <input id="donate-servings" type="number" required min="1" value="50"
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Portions / Servings *</label>
+            <input id="donate-servings" type="number" required min="1" value="60"
                    class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Weight (kg)</label>
-            <input id="donate-weight" type="number" step="0.5" value="20"
+            <input id="donate-weight" type="number" step="0.5" value="24"
                    class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
           </div>
           <div>
@@ -535,38 +578,32 @@
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pickup Address *</label>
-          <input id="donate-address" type="text" required placeholder="e.g. Connaught Place Banquet Kitchen Gate 3"
-                 value="Connaught Place Central Kitchen, New Delhi"
+          <input id="donate-address" type="text" required
+                 value="The Grand Heritage Banquet Hall #3, Connaught Place, New Delhi"
                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Packaging Condition</label>
-            <input id="donate-packaging" type="text" value="Sealed Food Grade Urns"
-                   class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+            <input id="donate-packaging" type="text" value="Sealed Insulated Food Containers"
+                   class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none" />
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Allergen Notice</label>
             <input id="donate-allergens" type="text" value="Contains Dairy (Paneer)"
-                   class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                   class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none" />
           </div>
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Image Preset / Photo</label>
-          <select id="donate-image-preset" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          <select id="donate-image-preset" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none">
             <option value="https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=600&q=80">🍲 Indian Feast & Curry Buffet</option>
             <option value="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80">🥖 Fresh Sourdough & Bakery Loaves</option>
             <option value="https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=600&q=80">🥦 Organic Fruits & Vegetables Crate</option>
             <option value="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80">🍱 Balanced Bento Meal Trays</option>
           </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Description / Notes</label>
-          <textarea id="donate-description" rows="2" placeholder="Brief notes for volunteers or recipient shelter..."
-                    class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
         </div>
 
         <div class="pt-3 border-t border-slate-100 flex justify-end gap-3">
@@ -581,48 +618,11 @@
     </div>
   </div>
 
-  <!-- Modal 2: Verify Delivery (Volunteer OTP Handover) -->
-  <div id="modal-verify-delivery" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-      <div class="text-center mb-4">
-        <div class="w-12 h-12 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
-          🔑
-        </div>
-        <h3 class="text-lg font-bold text-slate-900">Verify Recipient Handover</h3>
-        <p class="text-xs text-slate-500 mt-1">Ask the recipient shelter for their 4-digit verification code to confirm food arrival.</p>
-        <div id="verify-otp-hint" class="text-xs font-mono font-bold text-emerald-600 mt-1"></div>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1 text-center">4-Digit Security OTP</label>
-          <input id="verify-otp-input" type="text" maxlength="6" placeholder="e.g. 4821"
-                 class="w-full text-center text-2xl font-mono tracking-widest px-4 py-2.5 rounded-xl border border-slate-200 font-bold focus:ring-2 focus:ring-purple-500 focus:outline-none" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Handover Notes / Photo Proof Note</label>
-          <input id="verify-notes-input" type="text" placeholder="e.g. Received hot and intact by Shelter Head"
-                 class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none" />
-        </div>
-
-        <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal('modal-verify-delivery')" class="w-1/2 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">
-            Cancel
-          </button>
-          <button type="button" onclick="submitDeliveryVerification()" class="w-1/2 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-xl shadow">
-            Confirm Delivery ✓
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 3: Request Urgent Food Aid (NGO Shelter) -->
+  <!-- Modal 2: Request Urgent Food Aid (NGO Form) -->
   <div id="modal-aid-request" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
           <span>📢 Broadcast Emergency Meal Need</span>
         </h3>
         <button onclick="closeModal('modal-aid-request')" class="text-slate-400 text-2xl font-bold">&times;</button>
@@ -638,7 +638,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Servings Needed</label>
-            <input id="aid-servings-needed" type="number" min="5" value="65" required
+            <input id="aid-servings-needed" type="number" min="5" value="70" required
                    class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" />
           </div>
           <div>
@@ -653,30 +653,588 @@
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Details & Special Needs</label>
-          <textarea id="aid-notes" rows="2" placeholder="e.g. 65 children aged 5-14. Wholesome rice, lentils, or milk preferred."
+          <textarea id="aid-notes" rows="2" placeholder="e.g. 70 children dinner requirement. Cooked rice, daal, or bakery preferred."
                     class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="closeModal('modal-aid-request')" class="px-4 py-2 text-sm font-semibold text-slate-600">Cancel</button>
           <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-xl shadow">
-            Broadcast Request
+            Broadcast Request 🚨
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Toast Container -->
+  <!-- Modal 3: Admin Red Alert Broadcast -->
+  <div id="modal-admin-broadcast" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="text-lg font-black text-red-600 flex items-center gap-2">
+          <span>🚨 System-Wide Red Alert Broadcast</span>
+        </h3>
+        <button onclick="closeModal('modal-admin-broadcast')" class="text-slate-400 text-2xl font-bold">&times;</button>
+      </div>
+
+      <form id="form-admin-broadcast" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Alert Headline</label>
+          <input id="admin-alert-title" type="text" required value="🚨 URGENT: 120 Servings Expiring Soon in Central Zone"
+                 class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Message Body</label>
+          <textarea id="admin-alert-message" rows="3" required
+                    class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">Looking for immediate shelter pickup or runner near Connaught Place / Karol Bagh. Please claim via dashboard.</textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-admin-broadcast')" class="px-4 py-2 text-sm font-semibold text-slate-600">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-xl shadow">
+            Push Alert to All Screens 📡
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: AI Food Safety Advisor Calculator -->
+  <div id="modal-ai-advisor" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+          <span>🤖 AI Food Safety & Shelf-Life Calculator</span>
+        </h3>
+        <button onclick="closeModal('modal-ai-advisor')" class="text-slate-400 text-2xl font-bold">&times;</button>
+      </div>
+
+      <form id="advisor-calc-form" class="space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Food Category</label>
+            <select id="adv-category" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold focus:outline-none">
+              <option value="cooked_meals">🍲 Cooked Meals</option>
+              <option value="bakery">🥖 Bakery & Bread</option>
+              <option value="fresh_produce">🥦 Fresh Produce</option>
+              <option value="dairy">🥛 Dairy Products</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Dietary Type</label>
+            <select id="adv-food-type" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold focus:outline-none">
+              <option value="veg">🟢 Vegetarian</option>
+              <option value="non_veg">🔴 Non-Veg</option>
+              <option value="vegan">🌱 Vegan</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Hours Since Cooked</label>
+            <input id="adv-hours-ago" type="number" step="0.5" value="1.5" min="0" max="24"
+                   class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ambient Temp (°C)</label>
+            <input id="adv-temp" type="number" value="28" min="5" max="50"
+                   class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Storage Setup</label>
+          <select id="adv-storage" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold focus:outline-none">
+            <option value="room_temperature">Room Temperature (Ambient)</option>
+            <option value="hot_insulated">Hot Insulated Warmers (&gt;65°C)</option>
+            <option value="refrigerated">Chilled / Refrigerated (&lt;4°C)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow transition">
+          ⚡ Calculate Safe Window & Urgency
+        </button>
+      </form>
+
+      <div id="advisor-results" class="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl hidden">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-extrabold uppercase text-slate-600">AI Safety Index</span>
+          <span id="adv-score-val" class="text-base font-black text-emerald-700">92/100</span>
+        </div>
+        <div class="text-lg font-black text-slate-900" id="adv-hours-remaining">4.2 Hours Safe Remaining</div>
+        <ul id="adv-guidelines-list" class="text-xs text-slate-600 mt-2 space-y-1 list-disc pl-4"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Admin Security Gatekeeper Modal (Phone OTP or ID/Password) -->
+  <div id="modal-admin-login" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100">
+      <div class="text-center mb-4">
+        <div class="w-14 h-14 bg-indigo-100 text-indigo-700 rounded-2xl flex items-center justify-center mx-auto text-2xl mb-2 shadow-sm">
+          🛡️
+        </div>
+        <h3 class="text-xl font-black text-slate-900">Admin Command Center Login</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Login with your mobile phone OTP or Admin ID / Password.</p>
+      </div>
+
+      <!-- Tab Switcher: Phone OTP vs User ID & Password -->
+      <div class="grid grid-cols-2 p-1 bg-slate-100 rounded-xl mb-4 text-xs font-bold">
+        <button type="button" id="tab-login-admin-phone" onclick="switchLoginMethod('admin', 'phone')"
+                class="py-2 rounded-lg transition bg-white text-indigo-800 shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>📱 Phone & OTP</span>
+        </button>
+        <button type="button" id="tab-login-admin-pass" onclick="switchLoginMethod('admin', 'pass')"
+                class="py-2 rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>🔑 ID & Password</span>
+        </button>
+      </div>
+
+      <!-- View 1: Mobile Phone + OTP -->
+      <div id="view-login-admin-phone" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Mobile Phone Number</label>
+          <div class="flex gap-2">
+            <span class="inline-flex items-center px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-600 shrink-0">
+              🇮🇳 +91
+            </span>
+            <input id="admin-login-phone" type="tel" value="9999900000" placeholder="Enter phone number..."
+                   class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono tracking-wider focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            <button type="button" onclick="sendPortalOtp('admin')"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow transition shrink-0 cursor-pointer flex items-center gap-1">
+              <span>Send OTP</span>
+            </button>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px] text-indigo-900 bg-indigo-50 border border-indigo-200 px-2.5 py-1.5 rounded-lg">
+            <span>Demo Phone: <strong class="font-mono">9999900000</strong></span>
+            <button type="button" onclick="fillAdminDemoPhone()" class="font-extrabold text-indigo-700 hover:underline cursor-pointer">
+              Auto-fill Phone
+            </button>
+          </div>
+        </div>
+
+        <div id="section-admin-otp" class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-slate-700 uppercase">Verification OTP</label>
+            <span class="text-[10px] text-indigo-700 font-bold bg-indigo-100 px-2 py-0.5 rounded-full">SMS Demo OTP: 4821</span>
+          </div>
+          <div class="relative">
+            <input id="admin-login-otp" type="text" maxlength="6" value="4821" placeholder="Enter 4-digit OTP"
+                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono tracking-widest text-center font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            <button type="button" onclick="fillDemoOtp('admin')"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-[11px] font-bold text-indigo-700 hover:underline cursor-pointer">
+              Auto-fill 4821
+            </button>
+          </div>
+          <div id="admin-phone-error" class="text-xs font-bold text-red-600 hidden"></div>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-admin-login'); switchDashboard('donor');"
+                  class="w-1/2 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer">
+            Cancel
+          </button>
+          <button type="button" id="btn-verify-admin-otp" onclick="verifyPortalOtp('admin')"
+                  class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow transition cursor-pointer flex items-center justify-center gap-1.5">
+            <span>Verify & Unlock 🔓</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- View 2: User ID & Password -->
+      <form id="form-admin-login" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Admin ID / Email</label>
+          <input id="admin-login-userid" type="text" placeholder="e.g. admin or hq@foodrescuerevolution.org"
+                 class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Admin Password</label>
+          <div class="relative">
+            <input id="admin-login-password" type="password" placeholder="Enter admin password..."
+                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono tracking-wider focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            <button type="button" onclick="togglePasswordVisibility('admin-login-password')"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-semibold text-slate-400 hover:text-slate-600">
+              👁️
+            </button>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px] text-amber-900 bg-amber-50 border border-amber-200 px-2.5 py-1.5 rounded-lg">
+            <span>Demo: <strong class="font-mono">admin</strong> / <strong class="font-mono">admin123</strong></span>
+            <button type="button" onclick="fillAdminDemoPassword()" class="font-extrabold text-indigo-700 hover:underline cursor-pointer">
+              Auto-fill Both
+            </button>
+          </div>
+          <div id="admin-login-error" class="text-xs font-bold text-red-600 mt-1.5 hidden"></div>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-admin-login'); switchDashboard('donor');"
+                  class="w-1/2 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow transition cursor-pointer">
+            Unlock Console 🔓
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 6: Change Admin Password Modal -->
+  <div id="modal-change-password" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+          <span>🔑 Update Admin Password</span>
+        </h3>
+        <button onclick="closeModal('modal-change-password')" class="text-slate-400 text-2xl font-bold">&times;</button>
+      </div>
+
+      <form id="form-change-password" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Current Password *</label>
+          <input id="pwd-old" type="password" required placeholder="Enter current password..."
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">New Password * (Min 4 chars)</label>
+          <input id="pwd-new" type="password" minlength="4" required placeholder="Enter new password..."
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        <div id="pwd-change-msg" class="text-xs font-bold hidden"></div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-change-password')" class="px-4 py-2 text-sm font-semibold text-slate-600">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow">
+            Save New Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 7: Donor Security Gatekeeper Modal (Phone OTP or ID/Password) -->
+  <div id="modal-donor-login" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100">
+      <div class="text-center mb-4">
+        <div class="w-14 h-14 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto text-2xl mb-2 shadow-sm">
+          👨‍🍳
+        </div>
+        <h3 class="text-xl font-black text-slate-900">Food Donor Portal Login</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Login with your mobile phone OTP or User ID / Password.</p>
+      </div>
+
+      <!-- Tab Switcher: Phone OTP vs User ID & Password -->
+      <div class="grid grid-cols-2 p-1 bg-slate-100 rounded-xl mb-4 text-xs font-bold">
+        <button type="button" id="tab-login-donor-phone" onclick="switchLoginMethod('donor', 'phone')"
+                class="py-2 rounded-lg transition bg-white text-emerald-800 shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>📱 Phone & OTP</span>
+        </button>
+        <button type="button" id="tab-login-donor-pass" onclick="switchLoginMethod('donor', 'pass')"
+                class="py-2 rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>🔑 ID & Password</span>
+        </button>
+      </div>
+
+      <!-- View 1: Mobile Phone + OTP -->
+      <div id="view-login-donor-phone" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Mobile Phone Number</label>
+          <div class="flex gap-2">
+            <span class="inline-flex items-center px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-600 shrink-0">
+              🇮🇳 +91
+            </span>
+            <input id="donor-login-phone" type="tel" value="9876543210" placeholder="Enter phone number..."
+                   class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono tracking-wider focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+            <button type="button" onclick="sendPortalOtp('donor')"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow transition shrink-0 cursor-pointer flex items-center gap-1">
+              <span>Send OTP</span>
+            </button>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-lg">
+            <span>Demo Phone: <strong class="font-mono">9876543210</strong></span>
+            <button type="button" onclick="fillDonorDemoPhone()" class="font-extrabold text-emerald-700 hover:underline cursor-pointer">
+              Auto-fill Phone
+            </button>
+          </div>
+        </div>
+
+        <div id="section-donor-otp" class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-slate-700 uppercase">Verification OTP</label>
+            <span class="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">SMS Demo OTP: 4821</span>
+          </div>
+          <div class="relative">
+            <input id="donor-login-otp" type="text" maxlength="6" value="4821" placeholder="Enter 4-digit OTP"
+                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono tracking-widest text-center font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+            <button type="button" onclick="fillDemoOtp('donor')"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-[11px] font-bold text-emerald-700 hover:underline cursor-pointer">
+              Auto-fill 4821
+            </button>
+          </div>
+          <div id="donor-phone-error" class="text-xs font-bold text-red-600 hidden"></div>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-donor-login')"
+                  class="w-1/2 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer">
+            Cancel
+          </button>
+          <button type="button" id="btn-verify-donor-otp" onclick="verifyPortalOtp('donor')"
+                  class="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow transition cursor-pointer flex items-center justify-center gap-1.5">
+            <span>Verify & Unlock 🔓</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- View 2: User ID & Password -->
+      <form id="form-donor-login" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID / Email</label>
+          <input id="donor-login-userid" type="text" placeholder="e.g. chef_rajesh or banquets@grandheritage.com"
+                 class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Donor Password</label>
+          <div class="relative">
+            <input id="donor-login-password" type="password" placeholder="Enter donor password..."
+                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono tracking-wider focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+            <button type="button" onclick="togglePasswordVisibility('donor-login-password')"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-semibold text-slate-400 hover:text-slate-600">
+              👁️
+            </button>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-lg">
+            <span>Demo: <strong class="font-mono">chef_rajesh</strong> / <strong class="font-mono">donor123</strong></span>
+            <button type="button" onclick="fillDonorDemoPassword()" class="font-extrabold text-emerald-700 hover:underline cursor-pointer">
+              Auto-fill Both
+            </button>
+          </div>
+          <div id="donor-login-error" class="text-xs font-bold text-red-600 mt-1.5 hidden"></div>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-donor-login')"
+                  class="w-1/2 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow transition cursor-pointer">
+            Unlock with Password 🔓
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 8: Change Donor Password Modal -->
+  <div id="modal-donor-change-password" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+          <span>🔑 Update Donor Password</span>
+        </h3>
+        <button onclick="closeModal('modal-donor-change-password')" class="text-slate-400 text-2xl font-bold">&times;</button>
+      </div>
+
+      <form id="form-donor-change-password" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Current Password *</label>
+          <input id="donor-pwd-old" type="password" required placeholder="Enter current password..."
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">New Password * (Min 4 chars)</label>
+          <input id="donor-pwd-new" type="password" minlength="4" required placeholder="Enter new password..."
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <div id="donor-pwd-change-msg" class="text-xs font-bold hidden"></div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-donor-change-password')" class="px-4 py-2 text-sm font-semibold text-slate-600">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow">
+            Save New Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 9: NGO Security Gatekeeper Modal (Phone OTP or ID/Password) -->
+  <div id="modal-ngo-login" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100">
+      <div class="text-center mb-4">
+        <div class="w-14 h-14 bg-sky-100 text-sky-700 rounded-2xl flex items-center justify-center mx-auto text-2xl mb-2 shadow-sm">
+          🏛️
+        </div>
+        <h3 class="text-xl font-black text-slate-900">NGO & Shelter Portal Login</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Login with your mobile phone OTP or User ID / Password.</p>
+      </div>
+
+      <!-- Tab Switcher: Phone OTP vs User ID & Password -->
+      <div class="grid grid-cols-2 p-1 bg-slate-100 rounded-xl mb-4 text-xs font-bold">
+        <button type="button" id="tab-login-ngo-phone" onclick="switchLoginMethod('ngo', 'phone')"
+                class="py-2 rounded-lg transition bg-white text-sky-800 shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>📱 Phone & OTP</span>
+        </button>
+        <button type="button" id="tab-login-ngo-pass" onclick="switchLoginMethod('ngo', 'pass')"
+                class="py-2 rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>🔑 ID & Password</span>
+        </button>
+      </div>
+
+      <!-- View 1: Mobile Phone + OTP -->
+      <div id="view-login-ngo-phone" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Mobile Phone Number</label>
+          <div class="flex gap-2">
+            <span class="inline-flex items-center px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-600 shrink-0">
+              🇮🇳 +91
+            </span>
+            <input id="ngo-login-phone" type="tel" value="9899011223" placeholder="Enter phone number..."
+                   class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono tracking-wider focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+            <button type="button" onclick="sendPortalOtp('ngo')"
+                    class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow transition shrink-0 cursor-pointer flex items-center gap-1">
+              <span>Send OTP</span>
+            </button>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px] text-sky-800 bg-sky-50 border border-sky-200 px-2.5 py-1.5 rounded-lg">
+            <span>Demo Phone: <strong class="font-mono">9899011223</strong></span>
+            <button type="button" onclick="fillNgoDemoPhone()" class="font-extrabold text-sky-700 hover:underline cursor-pointer">
+              Auto-fill Phone
+            </button>
+          </div>
+        </div>
+
+        <div id="section-ngo-otp" class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-slate-700 uppercase">Verification OTP</label>
+            <span class="text-[10px] text-sky-700 font-bold bg-sky-100 px-2 py-0.5 rounded-full">SMS Demo OTP: 4821</span>
+          </div>
+          <div class="relative">
+            <input id="ngo-login-otp" type="text" maxlength="6" value="4821" placeholder="Enter 4-digit OTP"
+                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono tracking-widest text-center font-bold focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+            <button type="button" onclick="fillDemoOtp('ngo')"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-[11px] font-bold text-sky-700 hover:underline cursor-pointer">
+              Auto-fill 4821
+            </button>
+          </div>
+          <div id="ngo-phone-error" class="text-xs font-bold text-red-600 hidden"></div>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-ngo-login')"
+                  class="w-1/2 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer">
+            Cancel
+          </button>
+          <button type="button" id="btn-verify-ngo-otp" onclick="verifyPortalOtp('ngo')"
+                  class="w-1/2 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm rounded-xl shadow transition cursor-pointer flex items-center justify-center gap-1.5">
+            <span>Verify & Unlock 🔓</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- View 2: User ID & Password -->
+      <form id="form-ngo-login" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID / Email</label>
+          <input id="ngo-login-userid" type="text" placeholder="e.g. usr-rec-1 or sister_mary"
+                 class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">NGO Password</label>
+          <div class="relative">
+            <input id="ngo-login-password" type="password" placeholder="Enter NGO password..."
+                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono tracking-wider focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+            <button type="button" onclick="togglePasswordVisibility('ngo-login-password')"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-semibold text-slate-400 hover:text-slate-600">
+              👁️
+            </button>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px] text-sky-800 bg-sky-50 border border-sky-200 px-2.5 py-1.5 rounded-lg">
+            <span>Demo: <strong class="font-mono">sister_mary</strong> / <strong class="font-mono">ngo123</strong></span>
+            <button type="button" onclick="fillNgoDemoPassword()" class="font-extrabold text-sky-700 hover:underline cursor-pointer">
+              Auto-fill Both
+            </button>
+          </div>
+          <div id="ngo-login-error" class="text-xs font-bold text-red-600 mt-1.5 hidden"></div>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-ngo-login')"
+                  class="w-1/2 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="w-1/2 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm rounded-xl shadow transition cursor-pointer">
+            Unlock with Password 🔓
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 10: Change NGO Password Modal -->
+  <div id="modal-ngo-change-password" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+          <span>🔑 Update NGO Password</span>
+        </h3>
+        <button onclick="closeModal('modal-ngo-change-password')" class="text-slate-400 text-2xl font-bold">&times;</button>
+      </div>
+
+      <form id="form-ngo-change-password" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Current Password *</label>
+          <input id="ngo-pwd-old" type="password" required placeholder="Enter current password..."
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">New Password * (Min 4 chars)</label>
+          <input id="ngo-pwd-new" type="password" minlength="4" required placeholder="Enter new password..."
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div id="ngo-pwd-change-msg" class="text-xs font-bold hidden"></div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-ngo-change-password')" class="px-4 py-2 text-sm font-semibold text-slate-600">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm rounded-xl shadow">
+            Save New Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
   <div id="toast-container"></div>
 
-  <!-- 5. Footer -->
+  <!-- 4. Footer -->
   <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
       <div class="flex items-center gap-2">
-        <span class="font-bold text-slate-800">Food Rescue Revolution Platform</span>
+        <span class="font-bold text-slate-800">Food Rescue Revolution</span>
         <span>•</span>
-        <span>Zero Waste • Zero Hunger • Measurable Climate Action</span>
+        <span>3 Portals: 👨‍🍳 Donor • 🏛️ NGO • 🛡️ Admin</span>
       </div>
       <div class="flex items-center gap-4">
         <button onclick="triggerDatabaseReset()" class="text-emerald-700 hover:underline font-semibold">
@@ -689,7 +1247,6 @@
   </footer>
 
   <!-- Application Logic -->
-  <script src="app.js"></script>
+  <script src="app.js?v=2.5"></script>
 </body>
 </html>
-

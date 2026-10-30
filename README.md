@@ -44,6 +44,63 @@ Globally, over **1/3rd of all food produced is wasted**, while hundreds of milli
 
 ---
 
+## 🖥️ 3 Dedicated Portals & Dashboards
+
+The application is structured into **3 specialized, fully functional dashboards**:
+
+```
+                                ┌────────────────────────────────────────┐
+                                │      Food Rescue Revolution System     │
+                                └────────────────────────────────────────┘
+                                     │               │              │
+                   ┌─────────────────┴─┐      ┌──────┴─────┐  ┌─────┴────────────────┐
+                   ▼                   ▼      ▼            ▼  ▼                      ▼
+        👨‍🍳 1. Donor Dashboard        🏛️ 2. NGO Dashboard    🛡️ 3. Admin Command Center
+        (Jo Food Donate Karega)       (Enjio / Shelter Hub)   (Central Operations & HQ)
+        • Post Surplus in 30s         • Real-time Claiming    • Full Metro Ops Map
+        • Live Expiry Countdown       • Gate Handover OTPs    • Master Donations Table
+        • Shelter Needs Radar         • Inbound Pipeline      • Partner Verification
+        • Carbon Offset Stats         • Emergency Meal SOS    • System-Wide Red Alerts
+```
+
+### 1. 👨‍🍳 Donor Dashboard ("Jo Donate Karega")
+* **Purpose**: For Restaurants, Hotels, Banquets, Bakeries, Supermarkets, and Caterers.
+* **Security & Authentication**:
+  * **Password Protected Gatekeeper**: Requires Donor Password (`donor123`) before accessing the portal.
+  * **Session Controls**: Instant "🔒 Logout" button and "🔑 Password" change tool in banner.
+* **Key Features**:
+  * **Surplus Food Listing Form**: Post dishes with portion count, weight, dietary flags (Veg/Vegan/Non-Veg), and safe consumption window.
+  * **AI Shelf-Life Calculator**: Pre-screen safety before posting.
+  * **My Active Listings**: Live second-by-second countdown timer on all food items.
+  * **Shelter Relief Radar**: Nearby shelters in urgent need of dinner tonight with 1-click "Donate to this Shelter" fulfillment.
+  * **Impact Metrics**: Total Meals Rescued, Total kg diverted, CO2e averted.
+
+### 2. 🏛️ NGO / Shelter Dashboard ("Enjio Ka Portal")
+* **Purpose**: For Orphanages, Community Kitchens, Shelters, and Food Banks.
+* **Security & Authentication**:
+  * **Password Protected Gatekeeper**: Requires NGO Password (`ngo123`) before accessing relief controls.
+  * **Session Controls**: Instant "🔒 Logout" button and "🔑 Password" change tool in banner.
+* **Key Features**:
+  * **Surplus Food Claiming**: Browse available surplus food batches within city radius and claim with 1-click.
+  * **Gate Handover OTP Display**: Displays the **4-digit Security OTP (e.g., `4821`)** prominently so the shelter manager can provide it to the volunteer upon food arrival.
+  * **Inbound Delivery Tracker**: Live status of volunteer riders en route (`🛵 In Transit`).
+  * **Broadcast Urgent Meal Need (SOS)**: Alert nearby restaurants when the shelter kitchen runs short of meals for tonight.
+
+### 3. 🛡️ Admin Dashboard ("Admin Ka Command Center")
+* **Purpose**: For Central Platform Operations and City Dispatch Coordinators.
+* **Security & Authentication**:
+  * **Password Protected Gatekeeper**: Requires Admin Password (`admin123`) before granting access to central controls.
+  * **Session Management**: Session lock and instant Logout button.
+  * **Change Password**: In-dashboard security tool to update the Admin password anytime.
+* **Key Features**:
+  * **Network-Wide KPIs**: Total meals rescued, kg food diverted, carbon offset, active rescue runs in-flight.
+  * **Interactive Operations Map**: Real-time Leaflet map showing all live donations (green), claimed batches (orange), and registered shelters (blue).
+  * **Master Donations Registry Table**: Full control over all city listings with "Mark Delivered" and "Delete/Cancel" powers.
+  * **Partner Verification Directory**: Verify NGOs and Donors with "Verified Partner 🌟" badges.
+  * **Network Red Alert Broadcaster**: Push emergency alerts to all screens simultaneously.
+
+---
+
 ## ⚡ Quick Start Guide
 
 ### 1. Requirements

@@ -77,7 +77,7 @@ test('GET /styles.css should serve CSS file', async () => {
 test('GET /app.js should serve client JavaScript', async () => {
   const res = await callServer('GET', '/app.js');
   assert.equal(res.status, 200);
-  assert.ok(res.text.includes('initRoleSwitcher'));
+  assert.ok(res.text.includes('switchDashboard'));
 });
 
 test('GET /api/health should return online status', async () => {
@@ -187,4 +187,149 @@ test('POST & GET /api/aid-requests handles shelter requests', async () => {
   const getRes = await callServer('GET', '/api/aid-requests');
   assert.equal(getRes.status, 200);
   assert.ok(getRes.data.length > 0);
+});
+
+test('GET /api/donors/:id/stats should return donor specific KPIs', async () => {
+  const res = await callServer('GET', '/api/donors/usr-donor-1/stats');
+  assert.equal(res.status, 200);
+  assert.ok(res.data.total_servings !== undefined);
+  assert.ok(res.data.total_listings !== undefined);
+});
+
+test('GET /api/ngos/:id/stats should return NGO specific KPIs', async () => {
+  const res = await callServer('GET', '/api/ngos/usr-rec-1/stats');
+  assert.equal(res.status, 200);
+  assert.ok(res.data.total_claimed !== undefined);
+});
+
+test('PATCH /api/users/:id allows Admin verification', async () => {
+  const res = await callServer('PATCH', '/api/users/usr-donor-1', {
+    badge: 'Verified Platinum Donor 🌟'
+  });
+  assert.equal(res.status, 200);
+  assert.equal(res.data.badge, 'Verified Platinum Donor 🌟');
+});
+
+test('DELETE /api/donations/:id allows canceling a donation', async () => {
+  // Create temporary donation to delete
+  const createRes = await callServer('POST', '/api/donations', {
+    title: 'Donation to be deleted',
+    category: 'bakery',
+    food_type: 'veg',
+    servings: 15,
+    pickup_address: 'Test Place'
+  });
+  const id = createRes.data.id;
+
+  const delRes = await callServer('DELETE', `/api/donations/${id}`);
+  assert.equal(delRes.status, 200);
+  assert.equal(delRes.data.success, true);
+});
+
+test('POST /api/admin/login authenticates correct password', async () => {
+  const res = await callServer('POST', '/api/admin/login', { password: 'admin123' });
+  assert.equal(res.status, 200);
+  assert.equal(res.data.success, true);
+  assert.equal(res.data.authenticated, true);
+  assert.ok(res.data.token);
+});
+
+test('POST /api/admin/login rejects wrong password', async () => {
+  const res = await callServer('POST', '/api/admin/login', { password: 'wrongpassword' });
+  assert.equal(res.status, 401);
+  assert.equal(res.data.error, true);
+});
+
+test('POST /api/admin/change-password updates password', async () => {
+  const res = await callServer('POST', '/api/admin/change-password', {
+    old_password: 'admin123',
+    new_password: 'secureadmin2026'
+  });
+  assert.equal(res.status, 200);
+  assert.equal(res.data.success, true);
+
+  // Verify new password works
+  const loginRes = await callServer('POST', '/api/admin/login', { password: 'secureadmin2026' });
+  assert.equal(loginRes.status, 200);
+
+  // Restore back to admin123 for default demo
+  await callServer('POST', '/api/admin/change-password', {
+    old_password: 'secureadmin2026',
+    new_password: 'admin123'
+  });
+});
+
+test('POST /api/donor/login authenticates correct password', async () => {
+  const res = await callServer('POST', '/api/donor/login', { password: 'donor123' });
+  assert.equal(res.status, 200);
+  assert.equal(res.data.success, true);
+  assert.equal(res.data.authenticated, true);
+  assert.equal(res.data.role, 'donor');
+  assert.ok(res.data.token);
+});
+
+test('POST /api/donor/login rejects wrong password', async () => {
+  const res = await callServer('POST', '/api/donor/login', { password: 'badpwd' });
+  assert.equal(res.status, 401);
+  assert.equal(res.data.error, true);
+});
+
+test('POST /api/ngo/login authenticates correct password', async () => {
+  const res = await callServer('POST', '/api/ngo/login', { password: 'ngo123' });
+  assert.equal(res.status, 200);
+  assert.equal(res.data.success, true);
+  assert.equal(res.data.authenticated, true);
+  assert.equal(res.data.role, 'ngo');
+  assert.ok(res.data.token);
+});
+
+test('POST /api/ngo/login rejects wrong password', async () => {
+  const res = await callServer('POST', '/api/ngo/login', { password: 'badpwd' });
+  assert.equal(res.status, 401);
+  assert.equal(res.data.error, true);
+});
+
+test('POST /api/auth/login validates roles dynamically', async () => {
+  const donorRes = await callServer('POST', '/api/auth/login', { role: 'donor', password: 'donor123' });
+  assert.equal(donorRes.status, 200);
+  assert.equal(donorRes.data.role, 'donor');
+
+  const ngoRes = await callServer('POST', '/api/auth/login', { role: 'ngo', password: 'ngo123' });
+  assert.equal(ngoRes.status, 200);
+  assert.equal(ngoRes.data.role, 'ngo');
+
+  const adminRes = await callServer('POST', '/api/auth/login', { role: 'admin', password: 'admin123' });
+  assert.equal(adminRes.status, 200);
+  assert.equal(adminRes.data.role, 'admin');
+});
+
+test('Phone OTP Flow: send-otp -> verify-otp succeeds', async () => {
+  const sendRes = await callServer('POST', '/api/auth/send-otp', {
+    phone: '+91 98765 43210',
+    role: 'donor'
+  });
+  assert.equal(sendRes.status, 200);
+  assert.equal(sendRes.data.success, true);
+  assert.equal(sendRes.data.demo_otp, '4821');
+
+  const verifyRes = await callServer('POST', '/api/auth/verify-otp', {
+    phone: '+91 98765 43210',
+    otp: '4821',
+    role: 'donor'
+  });
+  assert.equal(verifyRes.status, 200);
+  assert.equal(verifyRes.data.success, true);
+  assert.equal(verifyRes.data.authenticated, true);
+  assert.equal(verifyRes.data.role, 'donor');
+  assert.ok(verifyRes.data.token);
+});
+
+test('Phone OTP Flow: rejects invalid OTP', async () => {
+  const res = await callServer('POST', '/api/auth/verify-otp', {
+    phone: '+91 98765 43210',
+    otp: '9999',
+    role: 'donor'
+  });
+  assert.equal(res.status, 401);
+  assert.equal(res.data.error, true);
 });
