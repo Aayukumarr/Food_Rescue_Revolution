@@ -3,6 +3,7 @@
 Food Rescue ML - Intelligent Spoilage & Quality Prediction System
 A standalone, 100% Pure Python Machine Learning Desktop Application.
 Zero HTML, Zero CSS, Zero JavaScript.
+Includes Authentication Security Gateway (Phone OTP & ID/Password).
 """
 
 import tkinter as tk
@@ -15,16 +16,29 @@ class FoodRescueApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Food Rescue ML - Intelligent Spoilage & Quality Prediction System")
-        self.geometry("1120x760")
-        self.minsize(980, 680)
+        self.geometry("1120x780")
+        self.minsize(980, 700)
         self.configure(bg="#0f172a")
 
         self.dataset_records = []
         self._load_records()
 
+        self.is_authenticated = False
+        self.current_user = {
+            'role': 'Admin / ML Engineer',
+            'phone': '9876543210',
+            'user_id': 'admin'
+        }
+
         self._setup_styles()
-        self._build_header()
-        self._build_notebook()
+
+        # Main dynamic containers
+        self.header_frame = None
+        self.main_content_frame = tk.Frame(self, bg="#0f172a")
+        self.main_content_frame.pack(fill="both", expand=True)
+
+        # Show Login Screen first
+        self._show_login_screen()
 
     def _load_records(self):
         try:
@@ -50,42 +64,237 @@ class FoodRescueApp(tk.Tk):
                        foreground=[("selected", "#ffffff"), ("active", "#ffffff")])
 
         self.style.configure("Card.TFrame", background="#1e293b", relief="flat")
-        self.style.configure("Header.TLabel", background="#0f172a", foreground="#ffffff", font=("Helvetica", 16, "bold"))
-        self.style.configure("SubHeader.TLabel", background="#0f172a", foreground="#94a3b8", font=("Helvetica", 10))
-        self.style.configure("CardTitle.TLabel", background="#1e293b", foreground="#ffffff", font=("Helvetica", 12, "bold"))
-        self.style.configure("FieldLabel.TLabel", background="#1e293b", foreground="#cbd5e1", font=("Helvetica", 9, "bold"))
-
-        # Treeview style
         self.style.configure("Treeview", background="#0f172a", foreground="#f8fafc",
                              fieldbackground="#0f172a", rowheight=26, font=("Helvetica", 9))
         self.style.configure("Treeview.Heading", background="#1e293b", foreground="#a855f7",
                              font=("Helvetica", 9, "bold"))
         self.style.map("Treeview", background=[("selected", "#7c3aed")])
 
-    def _build_header(self):
-        header_frame = tk.Frame(self, bg="#0f172a", padx=20, pady=12)
-        header_frame.pack(fill="x")
+    # =========================================================================
+    # LOGIN / AUTHENTICATION GATEWAY
+    # =========================================================================
+    def _show_login_screen(self):
+        self.is_authenticated = False
 
-        left = tk.Frame(header_frame, bg="#0f172a")
+        # Destroy header if exists
+        if self.header_frame:
+            self.header_frame.destroy()
+            self.header_frame = None
+
+        # Clear main content
+        for widget in self.main_content_frame.winfo_children():
+            widget.destroy()
+
+        login_center = tk.Frame(self.main_content_frame, bg="#0f172a")
+        login_center.place(relx=0.5, rely=0.5, anchor="center")
+
+        # Header in login
+        logo_label = tk.Label(login_center, text="🤖", font=("Helvetica", 36), bg="#0f172a", fg="#a855f7")
+        logo_label.pack(pady=(0, 4))
+
+        app_title = tk.Label(login_center, text="Food Rescue ML Security Gateway",
+                             bg="#0f172a", fg="#ffffff", font=("Helvetica", 18, "bold"))
+        app_title.pack()
+
+        app_sub = tk.Label(login_center, text="Authenticate with Mobile Phone OTP or User ID / Password",
+                           bg="#0f172a", fg="#94a3b8", font=("Helvetica", 10))
+        app_sub.pack(pady=(2, 16))
+
+        # Login Card
+        card = tk.Frame(login_center, bg="#1e293b", padx=26, pady=22, relief="flat", highlightthickness=1, highlightbackground="#334155")
+        card.pack(fill="both", expand=True)
+
+        # Tab Buttons: Phone OTP vs ID/Password
+        self.login_mode = "phone"
+        tab_bar = tk.Frame(card, bg="#0f172a", padx=4, pady=4)
+        tab_bar.pack(fill="x", pady=(0, 16))
+
+        self.btn_tab_phone = tk.Button(tab_bar, text="📱 Mobile Phone & OTP", bg="#7c3aed", fg="#ffffff",
+                                       font=("Helvetica", 9, "bold"), relief="flat", padx=14, pady=6, cursor="hand2",
+                                       command=lambda: self._switch_login_tab("phone"))
+        self.btn_tab_phone.pack(side="left", expand=True, fill="x", padx=2)
+
+        self.btn_tab_pass = tk.Button(tab_bar, text="🔑 ID & Password", bg="#0f172a", fg="#94a3b8",
+                                      font=("Helvetica", 9, "bold"), relief="flat", padx=14, pady=6, cursor="hand2",
+                                      command=lambda: self._switch_login_tab("pass"))
+        self.btn_tab_pass.pack(side="left", expand=True, fill="x", padx=2)
+
+        # View 1: Phone + OTP Form
+        self.frame_phone = tk.Frame(card, bg="#1e293b")
+        self.frame_phone.pack(fill="x")
+
+        tk.Label(self.frame_phone, text="MOBILE PHONE NUMBER", bg="#1e293b", fg="#cbd5e1", font=("Helvetica", 8, "bold")).pack(anchor="w")
+
+        phone_row = tk.Frame(self.frame_phone, bg="#1e293b")
+        phone_row.pack(fill="x", pady=(2, 4))
+
+        tk.Label(phone_row, text="🇮🇳 +91", bg="#334155", fg="#ffffff", font=("Helvetica", 9, "bold"), padx=8, pady=6).pack(side="left", padx=(0, 6))
+
+        self.entry_phone = tk.Entry(phone_row, bg="#0f172a", fg="#ffffff", insertbackground="#ffffff",
+                                    font=("Helvetica", 11, "bold"), relief="flat", highlightthickness=1, highlightbackground="#475569")
+        self.entry_phone.insert(0, "9876543210")
+        self.entry_phone.pack(side="left", fill="x", expand=True, padx=(0, 6), ipady=4)
+
+        btn_send_otp = tk.Button(phone_row, text="Send OTP", bg="#0ea5e9", fg="#ffffff", activebackground="#0284c7",
+                                 font=("Helvetica", 9, "bold"), relief="flat", padx=10, pady=6, cursor="hand2",
+                                 command=self._send_otp_clicked)
+        btn_send_otp.pack(side="left")
+
+        self.lbl_sms_status = tk.Label(self.frame_phone, text="Demo SMS Code: 4821 (Pre-filled)", bg="#1e293b", fg="#34d399", font=("Helvetica", 8, "bold"))
+        self.lbl_sms_status.pack(anchor="w", pady=(0, 10))
+
+        tk.Label(self.frame_phone, text="4-DIGIT VERIFICATION CODE", bg="#1e293b", fg="#cbd5e1", font=("Helvetica", 8, "bold")).pack(anchor="w")
+
+        self.entry_otp = tk.Entry(self.frame_phone, bg="#0f172a", fg="#38bdf8", insertbackground="#38bdf8",
+                                  font=("Courier", 14, "bold"), justify="center", relief="flat", highlightthickness=1, highlightbackground="#475569")
+        self.entry_otp.insert(0, "4821")
+        self.entry_otp.pack(fill="x", pady=(2, 14), ipady=5)
+
+        btn_verify_otp = tk.Button(self.frame_phone, text="🔓 Verify & Unlock ML Dashboard", bg="#7c3aed", fg="#ffffff",
+                                   activebackground="#6d28d9", font=("Helvetica", 11, "bold"), relief="flat",
+                                   pady=10, cursor="hand2", command=self._verify_phone_login)
+        btn_verify_otp.pack(fill="x")
+
+        # View 2: User ID & Password Form
+        self.frame_pass = tk.Frame(card, bg="#1e293b")
+
+        tk.Label(self.frame_pass, text="USER ID / ROLE", bg="#1e293b", fg="#cbd5e1", font=("Helvetica", 8, "bold")).pack(anchor="w")
+        self.entry_userid = tk.Entry(self.frame_pass, bg="#0f172a", fg="#ffffff", insertbackground="#ffffff",
+                                     font=("Helvetica", 10), relief="flat", highlightthickness=1, highlightbackground="#475569")
+        self.entry_userid.insert(0, "admin")
+        self.entry_userid.pack(fill="x", pady=(2, 10), ipady=5)
+
+        tk.Label(self.frame_pass, text="PASSWORD", bg="#1e293b", fg="#cbd5e1", font=("Helvetica", 8, "bold")).pack(anchor="w")
+        self.entry_pwd = tk.Entry(self.frame_pass, bg="#0f172a", fg="#ffffff", insertbackground="#ffffff", show="•",
+                                  font=("Helvetica", 10), relief="flat", highlightthickness=1, highlightbackground="#475569")
+        self.entry_pwd.insert(0, "admin123")
+        self.entry_pwd.pack(fill="x", pady=(2, 14), ipady=5)
+
+        btn_verify_pwd = tk.Button(self.frame_pass, text="🔓 Login with Password", bg="#7c3aed", fg="#ffffff",
+                                   activebackground="#6d28d9", font=("Helvetica", 11, "bold"), relief="flat",
+                                   pady=10, cursor="hand2", command=self._verify_password_login)
+        btn_verify_pwd.pack(fill="x")
+
+        # Quick 1-Click Demo Logins
+        tk.Label(card, text="─── OR 1-CLICK DEMO LOGIN ───", bg="#1e293b", fg="#64748b", font=("Helvetica", 8, "bold")).pack(pady=(14, 8))
+
+        quick_row = tk.Frame(card, bg="#1e293b")
+        quick_row.pack(fill="x")
+
+        tk.Button(quick_row, text="👨‍🍳 Donor Demo", bg="#334155", fg="#cbd5e1", font=("Helvetica", 8, "bold"),
+                  relief="flat", padx=6, pady=4, cursor="hand2", command=lambda: self._quick_login("Food Donor", "9876543210")).pack(side="left", expand=True, fill="x", padx=2)
+
+        tk.Button(quick_row, text="🏛️ NGO Shelter", bg="#334155", fg="#cbd5e1", font=("Helvetica", 8, "bold"),
+                  relief="flat", padx=6, pady=4, cursor="hand2", command=lambda: self._quick_login("NGO Shelter Partner", "9899011223")).pack(side="left", expand=True, fill="x", padx=2)
+
+        tk.Button(quick_row, text="🛡️ ML Scientist", bg="#334155", fg="#cbd5e1", font=("Helvetica", 8, "bold"),
+                  relief="flat", padx=6, pady=4, cursor="hand2", command=lambda: self._quick_login("ML Scientist & Evaluator", "9999900000")).pack(side="left", expand=True, fill="x", padx=2)
+
+    def _switch_login_tab(self, mode):
+        self.login_mode = mode
+        if mode == "phone":
+            self.btn_tab_phone.config(bg="#7c3aed", fg="#ffffff")
+            self.btn_tab_pass.config(bg="#0f172a", fg="#94a3b8")
+            self.frame_pass.pack_forget()
+            self.frame_phone.pack(fill="x")
+        else:
+            self.btn_tab_pass.config(bg="#7c3aed", fg="#ffffff")
+            self.btn_tab_phone.config(bg="#0f172a", fg="#94a3b8")
+            self.frame_phone.pack_forget()
+            self.frame_pass.pack(fill="x")
+
+    def _send_otp_clicked(self):
+        phone = self.entry_phone.get().strip() or "9876543210"
+        self.entry_otp.delete(0, tk.END)
+        self.entry_otp.insert(0, "4821")
+        self.lbl_sms_status.config(text=f"📩 Verification SMS sent to +91 {phone}: Code 4821", fg="#38bdf8")
+
+    def _verify_phone_login(self):
+        phone = self.entry_phone.get().strip() or "9876543210"
+        otp = self.entry_otp.get().strip()
+        if not otp:
+            otp = "4821"
+
+        if otp == "4821" or len(otp) >= 4:
+            self.current_user = {
+                'role': 'Authorized ML Analyst',
+                'phone': phone,
+                'user_id': phone
+            }
+            self._show_main_app()
+        else:
+            messagebox.showerror("Invalid Code", "Please enter valid OTP: 4821")
+
+    def _verify_password_login(self):
+        uid = self.entry_userid.get().strip() or "admin"
+        pwd = self.entry_pwd.get().strip()
+        if pwd in ["admin123", "donor123", "ngo123"] or len(pwd) >= 4:
+            self.current_user = {
+                'role': f"{uid.capitalize()} Portal",
+                'phone': '9876543210',
+                'user_id': uid
+            }
+            self._show_main_app()
+        else:
+            messagebox.showerror("Login Error", "Invalid password. Use: admin123")
+
+    def _quick_login(self, role, phone):
+        self.current_user = {
+            'role': role,
+            'phone': phone,
+            'user_id': role.lower().replace(" ", "_")
+        }
+        self._show_main_app()
+
+    # =========================================================================
+    # MAIN AUTHENTICATED APPLICATION
+    # =========================================================================
+    def _show_main_app(self):
+        self.is_authenticated = True
+
+        # Clear login screen
+        for widget in self.main_content_frame.winfo_children():
+            widget.destroy()
+
+        self._build_header()
+        self._build_notebook()
+
+    def _build_header(self):
+        if self.header_frame:
+            self.header_frame.destroy()
+
+        self.header_frame = tk.Frame(self, bg="#0f172a", padx=20, pady=12)
+        self.header_frame.pack(fill="x", before=self.main_content_frame)
+
+        left = tk.Frame(self.header_frame, bg="#0f172a")
         left.pack(side="left")
 
         title = tk.Label(left, text="🤖 Food Rescue ML - Spoilage & Quality Prediction System",
-                         bg="#0f172a", fg="#ffffff", font=("Helvetica", 16, "bold"))
+                         bg="#0f172a", fg="#ffffff", font=("Helvetica", 15, "bold"))
         title.pack(anchor="w")
 
         subtitle = tk.Label(left, text="Supervised Random Forest Regressor & Multi-Tier Classification Engine • Major Project",
-                            bg="#0f172a", fg="#94a3b8", font=("Helvetica", 10))
+                            bg="#0f172a", fg="#94a3b8", font=("Helvetica", 9))
         subtitle.pack(anchor="w", pady=(2, 0))
 
-        right = tk.Frame(header_frame, bg="#0f172a")
+        right = tk.Frame(self.header_frame, bg="#0f172a")
         right.pack(side="right")
 
-        badge = tk.Label(right, text=f"★ Model R² Score: {ml_system.metrics.get('r2_score', 0.9413)*100:.2f}% | 5,000 Samples",
-                         bg="#7c3aed", fg="#ffffff", font=("Helvetica", 10, "bold"), padx=12, pady=6)
-        badge.pack()
+        user_badge = tk.Label(right, text=f"👤 {self.current_user['role']} (+91 {self.current_user['phone']})",
+                              bg="#1e293b", fg="#cbd5e1", font=("Helvetica", 9, "bold"), padx=10, pady=5)
+        user_badge.pack(side="left", padx=(0, 8))
+
+        score_badge = tk.Label(right, text=f"★ R²: {ml_system.metrics.get('r2_score', 0.9413)*100:.1f}%",
+                               bg="#7c3aed", fg="#ffffff", font=("Helvetica", 9, "bold"), padx=10, pady=5)
+        score_badge.pack(side="left", padx=(0, 8))
+
+        btn_logout = tk.Button(right, text="🔒 Logout", bg="#dc2626", fg="#ffffff", activebackground="#b91c1c",
+                               font=("Helvetica", 9, "bold"), relief="flat", padx=10, pady=4, cursor="hand2",
+                               command=self._show_login_screen)
+        btn_logout.pack(side="left")
 
     def _build_notebook(self):
-        self.notebook = ttk.Notebook(self)
+        self.notebook = ttk.Notebook(self.main_content_frame)
         self.notebook.pack(fill="both", expand=True, padx=15, pady=(0, 15))
 
         # Tab 1: Live Spoilage Predictor

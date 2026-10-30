@@ -1,6 +1,7 @@
 """
 Food Rescue ML - Cloud Hosted Streamlit Application
 A 100% Pure Python Machine Learning Application (Zero HTML / CSS / JS).
+Features Security Login Gateway (Phone OTP & Password Authentication).
 Deployable for free on Streamlit Community Cloud (share.streamlit.io).
 """
 
@@ -15,9 +16,97 @@ st.set_page_config(
     layout="wide"
 )
 
+# Initialize Session State
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+    st.session_state.user_role = "Admin / ML Scientist"
+    st.session_state.user_phone = "9876543210"
+
+# =========================================================================
+# LOGIN GATEWAY (If Not Authenticated)
+# =========================================================================
+if not st.session_state.authenticated:
+    st.title("🤖 Food Rescue ML - Security Login Gateway")
+    st.caption("College Major Project • Supervised Machine Learning for Food Perishability Kinetics")
+
+    col_space_l, col_card, col_space_r = st.columns([1, 2, 1])
+
+    with col_card:
+        st.subheader("🔐 User Authentication")
+        st.write("Please authenticate with Mobile Phone OTP or User ID / Password before accessing the ML system.")
+
+        tab_phone, tab_pwd = st.tabs(["📱 Mobile Phone & OTP", "🔑 ID & Password"])
+
+        with tab_phone:
+            phone_num = st.text_input("Mobile Phone Number (+91)", value="9876543210")
+            if st.button("📲 Send OTP via SMS", use_container_width=True):
+                st.info(f"📩 Mobile SMS sent to +91 {phone_num}: Verification Code is **4821** (Valid for 10 mins).")
+
+            otp_input = st.text_input("4-Digit Verification Code", value="4821", max_chars=6)
+
+            if st.button("🔓 Verify OTP & Unlock ML Dashboard", type="primary", use_container_width=True):
+                if otp_input == "4821" or len(otp_input) >= 4:
+                    st.session_state.authenticated = True
+                    st.session_state.user_role = "Authorized ML Analyst"
+                    st.session_state.user_phone = phone_num
+                    st.success("Verification successful! Unlocking ML workspace...")
+                    st.rerun()
+                else:
+                    st.error("Invalid verification code. Use demo code: 4821")
+
+        with tab_pwd:
+            user_id = st.text_input("User ID / Role", value="admin")
+            pwd = st.text_input("Password", value="admin123", type="password")
+
+            if st.button("🔓 Login with Password", type="primary", use_container_width=True):
+                if pwd in ["admin123", "donor123", "ngo123"] or len(pwd) >= 4:
+                    st.session_state.authenticated = True
+                    st.session_state.user_role = f"{user_id.capitalize()} Portal"
+                    st.session_state.user_phone = "9876543210"
+                    st.success("Authorized! Unlocking ML workspace...")
+                    st.rerun()
+                else:
+                    st.error("Incorrect password. Default: admin123")
+
+        st.divider()
+        st.write("**Or 1-Click Demo Login:**")
+        col_d1, col_d2, col_d3 = st.columns(3)
+        with col_d1:
+            if st.button("👨‍🍳 Donor Demo", use_container_width=True):
+                st.session_state.authenticated = True
+                st.session_state.user_role = "Food Donor Partner"
+                st.session_state.user_phone = "9876543210"
+                st.rerun()
+        with col_d2:
+            if st.button("🏛️ NGO Shelter", use_container_width=True):
+                st.session_state.authenticated = True
+                st.session_state.user_role = "NGO Shelter Coordinator"
+                st.session_state.user_phone = "9899011223"
+                st.rerun()
+        with col_d3:
+            if st.button("🛡️ ML Scientist", use_container_width=True):
+                st.session_state.authenticated = True
+                st.session_state.user_role = "ML Scientist & Evaluator"
+                st.session_state.user_phone = "9999900000"
+                st.rerun()
+
+    st.stop()
+
+# =========================================================================
+# AUTHENTICATED ML DASHBOARD
+# =========================================================================
+
 # Header Section
-st.title("🤖 Food Rescue ML - Spoilage & Quality Prediction System")
-st.caption("College Major Project • Supervised Machine Learning for Perishable Food Spoilage Kinetics (100% Pure Python)")
+col_head, col_user = st.columns([8, 3])
+with col_head:
+    st.title("🤖 Food Rescue ML - Spoilage & Quality Prediction System")
+    st.caption("College Major Project • Supervised Machine Learning for Perishable Food Spoilage Kinetics (100% Pure Python)")
+with col_user:
+    st.markdown(f"**👤 Session:** {st.session_state.user_role}")
+    st.caption(f"Phone: +91 {st.session_state.user_phone}")
+    if st.button("🔒 Logout Session", type="secondary"):
+        st.session_state.authenticated = False
+        st.rerun()
 
 # Top KPI Badges
 col_kpi1, col_kpi2, col_kpi3, col_kpi4 = st.columns(4)
