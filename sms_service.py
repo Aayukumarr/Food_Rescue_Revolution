@@ -100,18 +100,69 @@ def send_real_sms(phone, otp):
     # 1. Fast2SMS Integration (Most popular Indian SMS API for developers)
     fast2sms_key = config.get('fast2sms_api_key') or config.get('api_key')
     if fast2sms_key and len(clean_phone) == 10:
+        # Method A: POST JSON request to Fast2SMS bulkV2
         try:
-            url = f"https://www.fast2sms.com/dev/bulkV2?authorization={fast2sms_key}&route=otp&variables_values={otp}&numbers={clean_phone}"
-            req = urllib.request.Request(url, headers={'User-Agent': 'FoodRescueApp/1.0'})
-            with urllib.request.urlopen(req, timeout=8) as response:
+            url = "https://www.fast2sms.com/dev/bulkV2"
+            payload = json.dumps({
+                "route": "otp",
+                "variables_values": str(otp),
+                "numbers": clean_phone
+            }).encode('utf-8')
+            headers = {
+                'authorization': fast2sms_key,
+                'Content-Type': 'application/json',
+                'User-Agent': 'FoodRescueApp/1.0'
+            }
+            req = urllib.request.Request(url, data=payload, headers=headers, method='POST')
+            with urllib.request.urlopen(req, timeout=10) as response:
                 res_data = json.loads(response.read().decode('utf-8'))
-                if res_data.get('return'):
+                if res_data.get('return') is True:
                     sms_sent = True
-                    status_message = f"Real SMS successfully delivered to +91 {clean_phone} via Fast2SMS!"
-        except Exception as e:
-            status_message = f"Fast2SMS error: {str(e)}"
+                    status_message = f"Real cellular SMS successfully delivered to +91 {clean_phone} via Fast2SMS!"
+                else:
+                    status_message = f"Fast2SMS notice: {res_data.get('message', res_data)}"
+        except Exception:
+            # Method B: GET query fallback
+            try:
+                get_url = f"https://www.fast2sms.com/dev/bulkV2?authorization={fast2sms_key}&route=otp&variables_values={otp}&numbers={clean_phone}"
+                req_get = urllib.request.Request(get_url, headers={'User-Agent': 'FoodRescueApp/1.0'})
+                with urllib.request.urlopen(req_get, timeout=8) as response:
+                    res_data = json.loads(response.read().decode('utf-8'))
+                    if res_data.get('return') is True:
+                        sms_sent = True
+                        status_message = f"Real cellular SMS delivered to +91 {clean_phone} via Fast2SMS!"
+            except Exception as e2:
+                status_message = f"Fast2SMS error: {str(e2)}"
 
-    # 2. 2Factor.in Integration (Indian Transactional OTP Gateway)
+    # 2. Twilio Global SMS Integration
+    twilio_sid = config.get('twilio_account_sid')
+    twilio_token = config.get('twilio_auth_token')
+    twilio_from = config.get('twilio_from_number')
+    if not sms_sent and twilio_sid and twilio_token and twilio_from:
+        try:
+            import base64
+            auth_str = f"{twilio_sid}:{twilio_token}"
+            auth_b64 = base64.b64encode(auth_str.encode('utf-8')).decode('utf-8')
+            twilio_url = f"https://api.twilio.com/2010-04-01/Accounts/{twilio_sid}/Messages.json"
+            target_num = f"+91{clean_phone}" if not clean_phone.startswith('+') else clean_phone
+            post_data = urllib.parse.urlencode({
+                'From': twilio_from,
+                'To': target_num,
+                'Body': f"Your Food Rescue ML verification code is: {otp}. Valid for 10 minutes."
+            }).encode('utf-8')
+            req = urllib.request.Request(twilio_url, data=post_data, headers={
+                'Authorization': f'Basic {auth_b64}',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            })
+            with urllib.request.urlopen(req, timeout=10) as response:
+                res_data = json.loads(response.read().decode('utf-8'))
+                if res_data.get('sid'):
+                    sms_sent = True
+                    status_message = f"Real SMS successfully delivered to {target_num} via Twilio!"
+        except Exception as e:
+            status_message = f"Twilio error: {str(e)}"
+
+    # 3. 2Factor.in Integration (Indian Transactional OTP Gateway)
     twofactor_key = config.get('twofactor_api_key')
     if not sms_sent and twofactor_key and len(clean_phone) == 10:
         try:
@@ -144,3 +195,4 @@ def send_real_sms(phone, otp):
         'sms_sent_to_cellular': sms_sent,
         'message': status_message
     }
+

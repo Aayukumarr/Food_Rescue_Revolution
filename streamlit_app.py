@@ -40,11 +40,11 @@ if not st.session_state.authenticated:
         tab_phone, tab_pwd = st.tabs(["📱 Mobile Phone & OTP", "🔑 ID & Password"])
 
         with tab_phone:
-            phone_num = st.text_input("Mobile Phone Number (+91)", value="9876543210")
-            if st.button("📲 Send OTP via SMS", use_container_width=True):
+            phone_num = st.text_input("Enter Mobile Phone Number (+91)", value="", placeholder="e.g. 9812345678")
+            if st.button("📲 Send Real OTP to this Mobile Number", use_container_width=True):
                 clean_phone = ''.join(filter(str.isdigit, phone_num))
                 if len(clean_phone) < 10:
-                    st.error("Please enter a valid 10-digit mobile number.")
+                    st.error("❌ Please enter a valid 10-digit Indian mobile number.")
                 else:
                     clean_phone, dynamic_otp = sms_service.generate_otp(clean_phone)
                     result = sms_service.send_real_sms(clean_phone, dynamic_otp)
@@ -54,32 +54,39 @@ if not st.session_state.authenticated:
                         'sms_sent': result.get('sms_sent_to_cellular', False)
                     }
                     if result.get('sms_sent_to_cellular'):
-                        st.success(f"✅ Real SMS sent to +91 {clean_phone} via cellular network!")
+                        st.success(f"✅ Real SMS sent to +91 {clean_phone}! Please check your mobile phone's Messages app and enter the 4-digit code below.")
                     else:
-                        st.info(f"📩 Verification OTP Generated for +91 {clean_phone}: **{dynamic_otp}** (Desktop banner sent). Enter code below.")
+                        st.warning(f"⚠️ SMS Gateway Key not yet added. Real cellular SMS cannot be dispatched without Fast2SMS API Key.\n\nGenerated Code: **{dynamic_otp}** (Valid 10 mins). Enter this code below, or add your free Fast2SMS key in the settings below to receive real SMS on your phone.")
 
-            default_val = st.session_state.get('last_otp_info', {}).get('otp', '4821') if st.session_state.get('last_otp_info') else ''
-            otp_input = st.text_input("4-Digit Verification Code", value=default_val, max_chars=6)
+            otp_input = st.text_input("Enter 4-Digit Verification Code Received on Phone", value="", max_chars=6, placeholder="e.g. 4821")
 
             if st.button("🔓 Verify OTP & Unlock ML Dashboard", type="primary", use_container_width=True):
-                is_valid, msg = sms_service.verify_otp(phone_num, otp_input)
-                if is_valid:
-                    st.session_state.authenticated = True
-                    st.session_state.user_role = "Authorized ML Analyst"
-                    st.session_state.user_phone = phone_num
-                    st.success("Verification successful! Unlocking ML workspace...")
-                    st.rerun()
+                if not otp_input.strip():
+                    st.error("Please enter the verification code received on your phone.")
                 else:
-                    st.error(f"Verification Failed: {msg}")
+                    is_valid, msg = sms_service.verify_otp(phone_num, otp_input)
+                    if is_valid:
+                        st.session_state.authenticated = True
+                        st.session_state.user_role = "Authorized ML Analyst"
+                        st.session_state.user_phone = phone_num
+                        st.success("Verification successful! Unlocking ML workspace...")
+                        st.rerun()
+                    else:
+                        st.error(f"❌ Verification Failed: {msg}")
 
-            with st.expander("⚙️ Configure Cellular SMS Gateway (Fast2SMS API Key)"):
-                st.caption("Add your free Fast2SMS API key to deliver SMS directly to your phone's SIM:")
+            with st.expander("⚙️ Enable Real Cellular SMS to any Phone (Fast2SMS API Key)"):
+                st.markdown("""
+                **Real SMS mobile SIM par bhejne ke liye:**
+                1. [Fast2SMS.com](https://www.fast2sms.com) par free me account banayein (Developers ko free SMS credits milte hain).
+                2. Wahan se apni **Dev API Key** copy karein.
+                3. Niche paste karke **Save** karein. Uske baad aap kisi ka bhi number daalenge, seedha uske phone par real SMS aayega!
+                """)
                 cfg = sms_service.load_sms_config()
                 f2s_key = st.text_input("Fast2SMS API Key", value=cfg.get('fast2sms_api_key', ''), type="password")
-                if st.button("Save SMS Key"):
+                if st.button("💾 Save Fast2SMS Key"):
                     cfg['fast2sms_api_key'] = f2s_key.strip()
                     sms_service.save_sms_config(cfg)
-                    st.success("Fast2SMS API Key saved! Next OTP will be sent directly to your phone SIM.")
+                    st.success("✅ Fast2SMS API Key saved! Ab aap kisi ka bhi number daalenge, real SMS deliver hoga.")
 
         with tab_pwd:
             user_id = st.text_input("User ID / Role", value="admin")
