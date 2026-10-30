@@ -333,3 +333,36 @@ test('Phone OTP Flow: rejects invalid OTP', async () => {
   assert.equal(res.status, 401);
   assert.equal(res.data.error, true);
 });
+
+test('POST /api/ml/predict returns ML shelf-life and decay curve', async () => {
+  const res = await callServer('POST', '/api/ml/predict', {
+    category: 'cooked_meals',
+    food_type: 'veg',
+    ambient_temp_c: 30,
+    humidity_percent: 65,
+    storage_condition: 'ambient_room',
+    prepared_hours_ago: 1.5
+  });
+  assert.equal(res.status, 200);
+  assert.ok(typeof res.data.predicted_shelf_life_hours === 'number');
+  assert.ok(res.data.confidence_interval);
+  assert.ok(Array.isArray(res.data.decay_curve));
+  assert.ok(res.data.urgency_tier);
+  assert.equal(res.data.algorithm, 'Ensemble Random Forest Regressor & Microbial Decay Estimator');
+});
+
+test('GET /api/ml/metrics returns model R2 and feature importance', async () => {
+  const res = await callServer('GET', '/api/ml/metrics');
+  assert.equal(res.status, 200);
+  assert.ok(res.data.metrics.r2_score >= 0.90);
+  assert.ok(res.data.feature_importance);
+  assert.equal(res.data.metrics.total_samples, 5000);
+});
+
+test('GET /api/ml/dataset returns training samples', async () => {
+  const res = await callServer('GET', '/api/ml/dataset?limit=10');
+  assert.equal(res.status, 200);
+  assert.equal(res.data.returned_count, 10);
+  assert.equal(res.data.total_samples_in_dataset, 5000);
+  assert.ok(res.data.samples[0].category);
+});
