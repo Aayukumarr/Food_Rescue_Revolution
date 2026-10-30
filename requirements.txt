@@ -1,8 +1,1 @@
-# Food Rescue ML - Requirements
-# NOTE: The core Desktop GUI Application (app.py) runs on 100% Pure Python standard library (Zero Dependencies Needed).
-# If you wish to run the optional scikit-learn training benchmark script (train_sklearn.py), install:
-
-pandas>=2.0.0
-numpy>=1.24.0
-scikit-learn>=1.3.0
-matplotlib>=3.7.0
+streamlit>=1.30.0
