@@ -10,6 +10,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import math
 import os
+import sms_service
 from ml_engine import ml_system, load_dataset, FEATURE_NAMES
 
 class FoodRescueApp(tk.Tk):
@@ -132,7 +133,7 @@ class FoodRescueApp(tk.Tk):
 
         self.entry_phone = tk.Entry(phone_row, bg="#0f172a", fg="#ffffff", insertbackground="#ffffff",
                                     font=("Helvetica", 11, "bold"), relief="flat", highlightthickness=1, highlightbackground="#475569")
-        self.entry_phone.insert(0, "9876543210")
+        self.entry_phone.insert(0, "")
         self.entry_phone.pack(side="left", fill="x", expand=True, padx=(0, 6), ipady=4)
 
         btn_send_otp = tk.Button(phone_row, text="Send OTP", bg="#0ea5e9", fg="#ffffff", activebackground="#0284c7",
@@ -140,20 +141,26 @@ class FoodRescueApp(tk.Tk):
                                  command=self._send_otp_clicked)
         btn_send_otp.pack(side="left")
 
-        self.lbl_sms_status = tk.Label(self.frame_phone, text="Demo SMS Code: 4821 (Pre-filled)", bg="#1e293b", fg="#34d399", font=("Helvetica", 8, "bold"))
-        self.lbl_sms_status.pack(anchor="w", pady=(0, 10))
+        self.lbl_sms_status = tk.Label(self.frame_phone, text="Enter your 10-digit mobile number and click 'Send OTP'",
+                                       bg="#1e293b", fg="#94a3b8", font=("Helvetica", 8))
+        self.lbl_sms_status.pack(anchor="w", pady=(0, 8))
 
-        tk.Label(self.frame_phone, text="4-DIGIT VERIFICATION CODE", bg="#1e293b", fg="#cbd5e1", font=("Helvetica", 8, "bold")).pack(anchor="w")
+        tk.Label(self.frame_phone, text="ENTER RECEIVED OTP CODE", bg="#1e293b", fg="#cbd5e1", font=("Helvetica", 8, "bold")).pack(anchor="w")
 
         self.entry_otp = tk.Entry(self.frame_phone, bg="#0f172a", fg="#38bdf8", insertbackground="#38bdf8",
                                   font=("Courier", 14, "bold"), justify="center", relief="flat", highlightthickness=1, highlightbackground="#475569")
-        self.entry_otp.insert(0, "4821")
-        self.entry_otp.pack(fill="x", pady=(2, 14), ipady=5)
+        self.entry_otp.pack(fill="x", pady=(2, 10), ipady=5)
 
-        btn_verify_otp = tk.Button(self.frame_phone, text="🔓 Verify & Unlock ML Dashboard", bg="#7c3aed", fg="#ffffff",
+        btn_verify_otp = tk.Button(self.frame_phone, text="🔓 Verify OTP & Unlock Dashboard", bg="#7c3aed", fg="#ffffff",
                                    activebackground="#6d28d9", font=("Helvetica", 11, "bold"), relief="flat",
                                    pady=10, cursor="hand2", command=self._verify_phone_login)
         btn_verify_otp.pack(fill="x")
+
+        # SMS Gateway Settings trigger
+        btn_sms_cfg = tk.Button(self.frame_phone, text="⚙️ Real Cellular SMS Gateway Settings (Fast2SMS)", bg="#1e293b", fg="#64748b",
+                                activebackground="#1e293b", activeforeground="#a855f7", font=("Helvetica", 8, "underline"),
+                                relief="flat", cursor="hand2", command=self._open_sms_settings)
+        btn_sms_cfg.pack(pady=(6, 0))
 
         # View 2: User ID & Password Form
         self.frame_pass = tk.Frame(card, bg="#1e293b")
@@ -204,26 +211,95 @@ class FoodRescueApp(tk.Tk):
             self.frame_pass.pack(fill="x")
 
     def _send_otp_clicked(self):
-        phone = self.entry_phone.get().strip() or "9876543210"
+        raw_phone = self.entry_phone.get().strip()
+        clean_digits = ''.join(filter(str.isdigit, raw_phone))
+        if len(clean_digits) < 10:
+            messagebox.showwarning("Mobile Number Required", "Please enter your valid 10-digit mobile number (e.g. 9812345678).")
+            self.entry_phone.focus_set()
+            return
+
+        clean_phone, dynamic_otp = sms_service.generate_otp(raw_phone)
+        res = sms_service.send_real_sms(clean_phone, dynamic_otp)
+
         self.entry_otp.delete(0, tk.END)
-        self.entry_otp.insert(0, "4821")
-        self.lbl_sms_status.config(text=f"📩 Verification SMS sent to +91 {phone}: Code 4821", fg="#38bdf8")
+        self.entry_otp.focus_set()
+
+        if res['sms_sent_to_cellular']:
+            self.lbl_sms_status.config(text=f"✅ Real SMS Dispatched to +91 {clean_phone} via cellular network!", fg="#34d399")
+            messagebox.showinfo("SMS Dispatched", f"An actual SMS has been sent to your mobile phone (+91 {clean_phone})!\n\nPlease check your phone's Messages app and enter the 4-digit OTP below.")
+        else:
+            self.lbl_sms_status.config(text=f"📩 OTP Code: {dynamic_otp} (Mac Push Banner Sent)", fg="#38bdf8")
+            info_msg = (
+                f"Verification OTP Generated for +91 {clean_phone}:\n\n"
+                f"👉  OTP Code: {dynamic_otp}\n\n"
+                f"• An instant desktop notification banner has appeared on your Mac.\n"
+                f"• Enter this code '{dynamic_otp}' in the box below to unlock.\n\n"
+                f"(To receive SMS directly on your phone's SIM card, click 'Configure SMS Gateway' to add your free Fast2SMS API key)."
+            )
+            messagebox.showinfo("Verification OTP Dispatched", info_msg)
 
     def _verify_phone_login(self):
-        phone = self.entry_phone.get().strip() or "9876543210"
-        otp = self.entry_otp.get().strip()
-        if not otp:
-            otp = "4821"
+        raw_phone = self.entry_phone.get().strip()
+        clean_digits = ''.join(filter(str.isdigit, raw_phone))
+        if len(clean_digits) < 10:
+            messagebox.showwarning("Mobile Number Required", "Please enter your 10-digit mobile number.")
+            return
 
-        if otp == "4821" or len(otp) >= 4:
+        entered_otp = self.entry_otp.get().strip()
+        if not entered_otp:
+            messagebox.showwarning("OTP Required", "Please enter the verification code received on your phone.")
+            self.entry_otp.focus_set()
+            return
+
+        is_valid, msg = sms_service.verify_otp(raw_phone, entered_otp)
+        if is_valid:
             self.current_user = {
                 'role': 'Authorized ML Analyst',
-                'phone': phone,
-                'user_id': phone
+                'phone': clean_digits[-10:],
+                'user_id': f"user_{clean_digits[-4:]}"
             }
+            messagebox.showinfo("Phone Number Verified", f"Mobile number +91 {clean_digits[-10:]} verified successfully! Unlocking ML workspace...")
             self._show_main_app()
         else:
-            messagebox.showerror("Invalid Code", "Please enter valid OTP: 4821")
+            messagebox.showerror("Verification Failed", msg)
+
+    def _open_sms_settings(self):
+        cfg_win = tk.Toplevel(self)
+        cfg_win.title("Real Cellular SMS Gateway Configuration")
+        cfg_win.geometry("540x360")
+        cfg_win.configure(bg="#0f172a")
+        cfg_win.transient(self)
+        cfg_win.grab_set()
+
+        container = tk.Frame(cfg_win, bg="#1e293b", padx=20, pady=20)
+        container.pack(fill="both", expand=True, padx=15, pady=15)
+
+        tk.Label(container, text="📱 Real Mobile SMS Gateway Setup", bg="#1e293b", fg="#ffffff", font=("Helvetica", 12, "bold")).pack(anchor="w")
+        tk.Label(container, text="To deliver real SMS to any Indian mobile number (+91), enter your free SMS gateway API key below:",
+                 bg="#1e293b", fg="#94a3b8", font=("Helvetica", 9), wraplength=480, justify="left").pack(anchor="w", pady=(2, 12))
+
+        current_cfg = sms_service.load_sms_config()
+
+        tk.Label(container, text="FAST2SMS API KEY (India Free OTP Gateway):", bg="#1e293b", fg="#cbd5e1", font=("Helvetica", 8, "bold")).pack(anchor="w")
+        entry_f2s = tk.Entry(container, bg="#0f172a", fg="#ffffff", insertbackground="#ffffff", font=("Helvetica", 10), relief="flat", highlightthickness=1)
+        entry_f2s.insert(0, current_cfg.get('fast2sms_api_key', ''))
+        entry_f2s.pack(fill="x", pady=(2, 8), ipady=4)
+
+        tk.Label(container, text="2FACTOR.IN API KEY (Alternative):", bg="#1e293b", fg="#cbd5e1", font=("Helvetica", 8, "bold")).pack(anchor="w")
+        entry_2f = tk.Entry(container, bg="#0f172a", fg="#ffffff", insertbackground="#ffffff", font=("Helvetica", 10), relief="flat", highlightthickness=1)
+        entry_2f.insert(0, current_cfg.get('twofactor_api_key', ''))
+        entry_2f.pack(fill="x", pady=(2, 12), ipady=4)
+
+        def save_and_close():
+            current_cfg['fast2sms_api_key'] = entry_f2s.get().strip()
+            current_cfg['twofactor_api_key'] = entry_2f.get().strip()
+            sms_service.save_sms_config(current_cfg)
+            messagebox.showinfo("Saved", "SMS Gateway settings updated successfully! New OTPs will now be sent via cellular network.", parent=cfg_win)
+            cfg_win.destroy()
+
+        btn_save = tk.Button(container, text="💾 Save Configuration", bg="#7c3aed", fg="#ffffff", font=("Helvetica", 10, "bold"),
+                             relief="flat", pady=8, cursor="hand2", command=save_and_close)
+        btn_save.pack(fill="x")
 
     def _verify_password_login(self):
         uid = self.entry_userid.get().strip() or "admin"

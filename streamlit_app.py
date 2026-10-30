@@ -9,6 +9,7 @@ import streamlit as st
 import math
 import os
 from ml_engine import ml_system, load_dataset, FEATURE_NAMES
+import sms_service
 
 st.set_page_config(
     page_title="Food Rescue ML - Spoilage & Quality Predictor",
@@ -21,6 +22,7 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
     st.session_state.user_role = "Admin / ML Scientist"
     st.session_state.user_phone = "9876543210"
+    st.session_state.last_otp_info = None
 
 # =========================================================================
 # LOGIN GATEWAY (If Not Authenticated)
@@ -40,19 +42,44 @@ if not st.session_state.authenticated:
         with tab_phone:
             phone_num = st.text_input("Mobile Phone Number (+91)", value="9876543210")
             if st.button("📲 Send OTP via SMS", use_container_width=True):
-                st.info(f"📩 Mobile SMS sent to +91 {phone_num}: Verification Code is **4821** (Valid for 10 mins).")
+                clean_phone = ''.join(filter(str.isdigit, phone_num))
+                if len(clean_phone) < 10:
+                    st.error("Please enter a valid 10-digit mobile number.")
+                else:
+                    clean_phone, dynamic_otp = sms_service.generate_otp(clean_phone)
+                    result = sms_service.send_real_sms(clean_phone, dynamic_otp)
+                    st.session_state.last_otp_info = {
+                        'phone': clean_phone,
+                        'otp': dynamic_otp,
+                        'sms_sent': result.get('sms_sent_to_cellular', False)
+                    }
+                    if result.get('sms_sent_to_cellular'):
+                        st.success(f"✅ Real SMS sent to +91 {clean_phone} via cellular network!")
+                    else:
+                        st.info(f"📩 Verification OTP Generated for +91 {clean_phone}: **{dynamic_otp}** (Desktop banner sent). Enter code below.")
 
-            otp_input = st.text_input("4-Digit Verification Code", value="4821", max_chars=6)
+            default_val = st.session_state.get('last_otp_info', {}).get('otp', '4821') if st.session_state.get('last_otp_info') else ''
+            otp_input = st.text_input("4-Digit Verification Code", value=default_val, max_chars=6)
 
             if st.button("🔓 Verify OTP & Unlock ML Dashboard", type="primary", use_container_width=True):
-                if otp_input == "4821" or len(otp_input) >= 4:
+                is_valid, msg = sms_service.verify_otp(phone_num, otp_input)
+                if is_valid:
                     st.session_state.authenticated = True
                     st.session_state.user_role = "Authorized ML Analyst"
                     st.session_state.user_phone = phone_num
                     st.success("Verification successful! Unlocking ML workspace...")
                     st.rerun()
                 else:
-                    st.error("Invalid verification code. Use demo code: 4821")
+                    st.error(f"Verification Failed: {msg}")
+
+            with st.expander("⚙️ Configure Cellular SMS Gateway (Fast2SMS API Key)"):
+                st.caption("Add your free Fast2SMS API key to deliver SMS directly to your phone's SIM:")
+                cfg = sms_service.load_sms_config()
+                f2s_key = st.text_input("Fast2SMS API Key", value=cfg.get('fast2sms_api_key', ''), type="password")
+                if st.button("Save SMS Key"):
+                    cfg['fast2sms_api_key'] = f2s_key.strip()
+                    sms_service.save_sms_config(cfg)
+                    st.success("Fast2SMS API Key saved! Next OTP will be sent directly to your phone SIM.")
 
         with tab_pwd:
             user_id = st.text_input("User ID / Role", value="admin")

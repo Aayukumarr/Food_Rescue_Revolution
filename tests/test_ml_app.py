@@ -59,5 +59,25 @@ class TestFoodRescueML(unittest.TestCase):
         self.assertIn('Decision Tree Regressor', models)
         self.assertGreater(models['Random Forest Regressor']['r2'], models['Decision Tree Regressor']['r2'])
 
+    def test_06_sms_otp_generation_and_verification(self):
+        import sms_service
+        phone = "9876543210"
+        clean_phone, otp = sms_service.generate_otp(phone)
+        self.assertEqual(clean_phone, "9876543210")
+        self.assertEqual(len(otp), 4)
+        self.assertTrue(otp.isdigit())
+
+        # Test valid verification
+        valid, msg = sms_service.verify_otp(phone, otp)
+        self.assertTrue(valid)
+
+    def test_07_invalid_otp_rejection(self):
+        import sms_service
+        phone = "9123456789"
+        clean_phone, otp = sms_service.generate_otp(phone)
+        valid, msg = sms_service.verify_otp(phone, "0000" if otp != "0000" else "9999")
+        self.assertFalse(valid)
+        self.assertIn("Incorrect", msg)
+
 if __name__ == '__main__':
     unittest.main()
