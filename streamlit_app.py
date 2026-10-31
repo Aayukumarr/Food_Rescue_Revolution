@@ -13,6 +13,7 @@ import os
 from ml_engine import ml_system, load_dataset, FEATURE_NAMES
 import donations_store
 import sms_service
+import chat_service
 
 st.set_page_config(
     page_title="Food Rescue ML - Donor & NGO Dashboards",
@@ -25,8 +26,13 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
     st.session_state.user_role = "Food Donor Partner"
     st.session_state.user_phone = "9876543210"
-    st.session_state.active_portal = "donor"  # "donor" or "ngo" or "ml_core"
+    st.session_state.active_portal = "donor"  # "donor", "ngo", "messenger", "chatbot"
     st.session_state.last_otp_info = None
+
+if "bot_history" not in st.session_state:
+    st.session_state.bot_history = [
+        {"role": "assistant", "content": "👋 Namaste! I am your AI Food Rescue & Safety Assistant. Ask me anything about food spoilage, safe hours, temperature rules, packaging barriers, or NGO collection!"}
+    ]
 
 # =========================================================================
 # LOGIN GATEWAY (If Not Authenticated)
@@ -133,18 +139,40 @@ with col_profile:
         st.session_state.authenticated = False
         st.rerun()
 
-# Primary Portal Selector (Only 2 Clean End-User Dashboards)
-portal_options = ["👨‍🍳 Food Donor Portal", "🏛️ NGO Shelter Portal"]
-default_idx = 0 if st.session_state.active_portal != "ngo" else 1
+# Primary Portal Selector
+portal_options = [
+    "👨‍🍳 Food Donor Portal",
+    "🏛️ NGO Shelter Portal",
+    "💬 Direct Messenger (Donor ↔ NGO)",
+    "🤖 AI Rescue Chatbot"
+]
+
+if st.session_state.active_portal == "donor":
+    default_idx = 0
+elif st.session_state.active_portal == "ngo":
+    default_idx = 1
+elif st.session_state.active_portal == "messenger":
+    default_idx = 2
+elif st.session_state.active_portal == "chatbot":
+    default_idx = 3
+else:
+    default_idx = 0
 
 selected_portal_label = st.radio(
-    "Active Portal:",
+    "Active System View:",
     options=portal_options,
     index=default_idx,
     horizontal=True
 )
 
-st.session_state.active_portal = "donor" if "Donor" in selected_portal_label else "ngo"
+if "Donor" in selected_portal_label:
+    st.session_state.active_portal = "donor"
+elif "NGO" in selected_portal_label:
+    st.session_state.active_portal = "ngo"
+elif "Messenger" in selected_portal_label:
+    st.session_state.active_portal = "messenger"
+else:
+    st.session_state.active_portal = "chatbot"
 
 st.divider()
 
@@ -326,7 +354,7 @@ if st.session_state.active_portal == "donor":
 # =========================================================================
 # 2. NGO SHELTER DASHBOARD
 # =========================================================================
-else:
+elif st.session_state.active_portal == "ngo":
     st.subheader("🏛️ NGO Shelter & Food Rescue Portal - Live Rescue Dispatch Feed")
     st.write("NGOs, Orphanages, and Relief Shelters can claim surplus food ranked dynamically by Machine Learning Urgency.")
 
@@ -406,6 +434,101 @@ else:
                     st.success(f"✅ **CLAIMED & RESCUED**\n\nClaimed by: **{item.get('claimed_by', 'NGO Shelter')}**\nVolunteer Phone: **+91 {item.get('claimed_phone', 'N/A')}**")
 
             st.divider()
+
+# =========================================================================
+# 3. DIRECT MESSENGER (DONOR <-> NGO COORDINATION CHAT)
+# =========================================================================
+elif st.session_state.active_portal == "messenger":
+    st.subheader("💬 Direct Food Rescue Coordination Messenger")
+    st.write("Real-time live messaging between Food Donors and NGO Shelter Volunteers to coordinate food pickup, address landmarks, and ETA.")
+
+    all_dons = donations_store.load_donations()
+    thread_map = {f"{d.get('id')}: {d.get('food_name')} ({d.get('status')})": d.get('id') for d in all_dons}
+    thread_map["GENERAL: General Dispatch Coordination"] = "GENERAL"
+
+    col_t1, col_t2 = st.columns([6, 4])
+    with col_t1:
+        chosen_thread_label = st.selectbox("Select Active Donation Thread:", list(thread_map.keys()))
+        current_thread_id = thread_map[chosen_thread_label]
+    with col_t2:
+        st.info(f"Active Conversation: **{chosen_thread_label}**")
+
+    st.markdown("---")
+
+    # Messages Container
+    msgs = chat_service.get_messages_by_donation(current_thread_id)
+    if not msgs:
+        st.caption("No messages yet in this thread. Start the conversation below!")
+    else:
+        for m in msgs:
+            is_donor = "Donor" in m.get('sender_role', '')
+            role_icon = "👨‍🍳" if is_donor else "🏛️"
+            role_badge = "Food Donor" if is_donor else "NGO Shelter Volunteer"
+            with st.chat_message("user" if is_donor else "assistant", avatar=role_icon):
+                st.markdown(f"**{role_icon} {m.get('sender_name')}** (`{role_badge}` • +91 {m.get('sender_phone')}) — *{m.get('timestamp')}*")
+                st.write(m.get('message'))
+
+    st.markdown("---")
+    # Message Send Form
+    with st.form("send_msg_form", clear_on_submit=True):
+        col_inp, col_btn = st.columns([8, 2])
+        with col_inp:
+            msg_text = st.text_input("Type your message here...", placeholder="e.g. Volunteer Rahul is en-route, will arrive at Gate #2 in 15 mins.")
+        with col_btn:
+            submitted = st.form_submit_button("📤 Send", use_container_width=True)
+
+        if submitted and msg_text.strip():
+            chat_service.send_chat_message(
+                donation_id=current_thread_id,
+                sender_role=st.session_state.user_role,
+                sender_name=st.session_state.user_role.split()[0] + " Partner",
+                sender_phone=st.session_state.user_phone,
+                message_text=msg_text.strip()
+            )
+            st.success("Message sent successfully!")
+            st.rerun()
+
+# =========================================================================
+# 4. AI FOOD RESCUE ASSISTANT CHATBOT
+# =========================================================================
+elif st.session_state.active_portal == "chatbot":
+    st.subheader("🤖 AI Food Rescue & Quality Assistant")
+    st.write("Ask any question regarding food perishability kinetics, safe shelf-life, temperature conditions, packaging barriers, or FSSAI surplus donation protocols.")
+
+    st.markdown("**Quick Topics:**")
+    col_p1, col_p2, col_p3, col_p4 = st.columns(4)
+    with col_p1:
+        if st.button("🍲 Cooked Food Shelf-life"):
+            st.session_state.pending_prompt = "How long does cooked food stay safe?"
+    with col_p2:
+        if st.button("🌡️ Temperature Spoilage"):
+            st.session_state.pending_prompt = "How does temperature affect microbial spoilage?"
+    with col_p3:
+        if st.button("📦 Packaging Standards"):
+            st.session_state.pending_prompt = "What packaging is best for food safety?"
+    with col_p4:
+        if st.button("🚨 ML Urgency Tiers"):
+            st.session_state.pending_prompt = "What does Red Alert urgency mean?"
+
+    st.markdown("---")
+
+    # Render Chat History
+    for msg in st.session_state.bot_history:
+        avatar = "🤖" if msg["role"] == "assistant" else "👤"
+        with st.chat_message(msg["role"], avatar=avatar):
+            st.markdown(msg["content"])
+
+    # Handle pending prompt or chat input
+    user_query = st.chat_input("Ask AI Food Rescue Assistant anything...")
+    if "pending_prompt" in st.session_state and st.session_state.pending_prompt:
+        user_query = st.session_state.pending_prompt
+        st.session_state.pending_prompt = None
+
+    if user_query:
+        st.session_state.bot_history.append({"role": "user", "content": user_query})
+        bot_reply = chat_service.get_ai_bot_response(user_query)
+        st.session_state.bot_history.append({"role": "assistant", "content": bot_reply})
+        st.rerun()
 
 # =========================================================================
 # FACULTY & EXAMINER EVALUATION SUITE (Collapsible Mode)

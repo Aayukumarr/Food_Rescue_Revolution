@@ -1,0 +1,56 @@
+[
+  {
+    "id": "MSG-101",
+    "donation_id": "DON-101",
+    "sender_role": "Food Donor Partner",
+    "sender_name": "Royal Banquet Hall",
+    "sender_phone": "9811223344",
+    "message": "Hello, 35 kg mixed veg & pulao is packed in sealed thermal foil containers. Please collect from Gate #2.",
+    "timestamp": "Today, 1:45 PM"
+  },
+  {
+    "id": "MSG-102",
+    "donation_id": "DON-101",
+    "sender_role": "NGO Shelter Coordinator",
+    "sender_name": "Robin Hood Army",
+    "sender_phone": "9899011223",
+    "message": "Received! Volunteer Amit is reaching in an insulated carrier van. ETA 20 minutes.",
+    "timestamp": "Today, 1:49 PM"
+  },
+  {
+    "id": "MSG-103",
+    "donation_id": "DON-102",
+    "sender_role": "Food Donor Partner",
+    "sender_name": "Spice Court Restaurant",
+    "sender_phone": "9876543210",
+    "message": "Paneer curry is fresh and kept at room temperature. Safe window is ~6 hours according to ML scanner.",
+    "timestamp": "Today, 2:20 PM"
+  },
+  {
+    "id": "MSG-104",
+    "donation_id": "DON-102",
+    "sender_role": "NGO Shelter Coordinator",
+    "sender_name": "Feeding India Shelter",
+    "sender_phone": "9812345678",
+    "message": "We have claimed this listing and will distribute it at Central Shelter by 4:00 PM.",
+    "timestamp": "Today, 2:25 PM"
+  },
+  {
+    "id": "MSG-105",
+    "donation_id": "DON-101",
+    "sender_role": "Food Donor Partner",
+    "sender_name": "Taj Test Hotel",
+    "sender_phone": "9876543210",
+    "message": "Testing direct message from donor",
+    "timestamp": "Today, 10:29 AM"
+  },
+  {
+    "id": "MSG-106",
+    "donation_id": "DON-101",
+    "sender_role": "Food Donor Partner",
+    "sender_name": "Taj Test Hotel",
+    "sender_phone": "9876543210",
+    "message": "Testing direct message from donor",
+    "timestamp": "Today, 10:29 AM"
+  }
+]

@@ -17,6 +17,7 @@ import math
 import os
 import sms_service
 import donations_store
+import chat_service
 from ml_engine import ml_system, load_dataset, FEATURE_NAMES
 
 class FoodRescueApp(tk.Tk):
@@ -343,8 +344,208 @@ class FoodRescueApp(tk.Tk):
         self.notebook.add(self.tab_ngo, text="  🏛️ NGO Shelter Portal  ")
         self._build_tab_ngo(self.tab_ngo)
 
-        if hasattr(self, 'default_tab_idx') and self.default_tab_idx < 2:
+        # Tab 3: Direct Messenger (Donor ↔ NGO)
+        self.tab_messenger = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab_messenger, text="  💬 Direct Messenger (Donor ↔ NGO)  ")
+        self._build_tab_messenger(self.tab_messenger)
+
+        # Tab 4: AI Food Rescue Chatbot
+        self.tab_chatbot = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab_chatbot, text="  🤖 AI Rescue Chatbot  ")
+        self._build_tab_chatbot(self.tab_chatbot)
+
+        if hasattr(self, 'default_tab_idx') and self.default_tab_idx < 4:
             self.notebook.select(self.default_tab_idx)
+
+    # =========================================================================
+    # TAB 3: DIRECT MESSENGER (DONOR <-> NGO CHAT)
+    # =========================================================================
+    def _build_tab_messenger(self, parent):
+        container = tk.Frame(parent, bg="#0f172a", padx=12, pady=10)
+        container.pack(fill="both", expand=True)
+
+        top_bar = tk.Frame(container, bg="#1e293b", padx=16, pady=10)
+        top_bar.pack(fill="x", pady=(0, 8))
+
+        tk.Label(top_bar, text="💬 Direct Food Rescue Coordination Messenger", bg="#1e293b", fg="#ffffff", font=("Helvetica", 12, "bold")).pack(anchor="w")
+        tk.Label(top_bar, text="Live communication between Donors and NGO Volunteers to coordinate pickup times, gate landmarks, and ETA.",
+                 bg="#1e293b", fg="#94a3b8", font=("Helvetica", 8)).pack(anchor="w", pady=(1, 6))
+
+        sel_row = tk.Frame(top_bar, bg="#1e293b")
+        sel_row.pack(fill="x")
+
+        tk.Label(sel_row, text="ACTIVE THREAD:", bg="#1e293b", fg="#cbd5e1", font=("Helvetica", 8, "bold")).pack(side="left", padx=(0, 6))
+
+        self.combo_thread = ttk.Combobox(sel_row, state="readonly", font=("Helvetica", 9), width=50)
+        self.combo_thread.pack(side="left", padx=(0, 10))
+        self.combo_thread.bind("<<ComboboxSelected>>", lambda e: self._refresh_chat_feed())
+
+        tk.Button(sel_row, text="🔄 Refresh Chat", bg="#334155", fg="#ffffff", font=("Helvetica", 8, "bold"),
+                  relief="flat", padx=10, pady=2, cursor="hand2", command=self._refresh_chat_feed).pack(side="right")
+
+        # Chat History Display Box
+        chat_frame = tk.Frame(container, bg="#1e293b", padx=12, pady=10)
+        chat_frame.pack(fill="both", expand=True, pady=(0, 8))
+
+        self.txt_chat = tk.Text(chat_frame, bg="#0f172a", fg="#ffffff", font=("Helvetica", 10),
+                                relief="flat", padx=12, pady=10, wrap="word", state="disabled")
+        self.txt_chat.pack(side="left", fill="both", expand=True)
+
+        scroll_chat = tk.Scrollbar(chat_frame, command=self.txt_chat.yview)
+        scroll_chat.pack(side="right", fill="y")
+        self.txt_chat.config(yscrollcommand=scroll_chat.set)
+
+        # Bottom Input Row
+        input_bar = tk.Frame(container, bg="#1e293b", padx=14, pady=10)
+        input_bar.pack(fill="x")
+
+        self.entry_chat_msg = tk.Entry(input_bar, bg="#0f172a", fg="#ffffff", insertbackground="#ffffff",
+                                       font=("Helvetica", 10), relief="flat", highlightthickness=1, highlightbackground="#475569")
+        self.entry_chat_msg.pack(side="left", fill="x", expand=True, padx=(0, 10), ipady=5)
+        self.entry_chat_msg.bind("<Return>", lambda e: self._send_chat_msg())
+
+        btn_send = tk.Button(input_bar, text="📤 Send Message", bg="#7c3aed", fg="#ffffff", activebackground="#6d28d9",
+                             font=("Helvetica", 9, "bold"), relief="flat", padx=16, pady=5, cursor="hand2", command=self._send_chat_msg)
+        btn_send.pack(side="right")
+
+        self._populate_thread_list()
+
+    def _populate_thread_list(self):
+        donations = donations_store.load_donations()
+        self.thread_dict = {}
+        values = []
+        for d in donations:
+            lbl = f"{d.get('id')}: {d.get('food_name')} ({d.get('status')})"
+            self.thread_dict[lbl] = d.get('id')
+            values.append(lbl)
+        self.thread_dict["GENERAL: General Dispatch Coordination"] = "GENERAL"
+        values.append("GENERAL: General Dispatch Coordination")
+
+        self.combo_thread['values'] = values
+        if values:
+            self.combo_thread.current(0)
+        self._refresh_chat_feed()
+
+    def _refresh_chat_feed(self):
+        sel_label = self.combo_thread.get() if hasattr(self, 'combo_thread') else "GENERAL"
+        thread_id = getattr(self, 'thread_dict', {}).get(sel_label, "GENERAL")
+
+        msgs = chat_service.get_messages_by_donation(thread_id)
+        self.txt_chat.config(state="normal")
+        self.txt_chat.delete("1.0", tk.END)
+
+        if not msgs:
+            self.txt_chat.insert(tk.END, "No messages yet in this thread.\nType a message below to coordinate food collection!\n\n")
+        else:
+            for m in msgs:
+                is_donor = "Donor" in m.get('sender_role', '')
+                icon = "👨‍🍳" if is_donor else "🏛️"
+                role_name = "Food Donor" if is_donor else "NGO Shelter"
+                header_line = f"{icon} {m.get('sender_name')} ({role_name} • +91 {m.get('sender_phone')})  —  {m.get('timestamp')}\n"
+                msg_body = f"   {m.get('message')}\n\n"
+                self.txt_chat.insert(tk.END, header_line)
+                self.txt_chat.insert(tk.END, msg_body)
+
+        self.txt_chat.see(tk.END)
+        self.txt_chat.config(state="disabled")
+
+    def _send_chat_msg(self):
+        txt = self.entry_chat_msg.get().strip()
+        if not txt:
+            return
+
+        sel_label = self.combo_thread.get() if hasattr(self, 'combo_thread') else "GENERAL"
+        thread_id = getattr(self, 'thread_dict', {}).get(sel_label, "GENERAL")
+
+        sender_role = self.current_user.get('role', 'Food Donor Partner')
+        sender_name = self.current_user.get('user_id', 'Partner')
+        sender_phone = self.current_user.get('phone', '9876543210')
+
+        chat_service.send_chat_message(thread_id, sender_role, sender_name, sender_phone, txt)
+        self.entry_chat_msg.delete(0, tk.END)
+        self._refresh_chat_feed()
+
+    # =========================================================================
+    # TAB 4: AI FOOD RESCUE ASSISTANT CHATBOT
+    # =========================================================================
+    def _build_tab_chatbot(self, parent):
+        container = tk.Frame(parent, bg="#0f172a", padx=12, pady=10)
+        container.pack(fill="both", expand=True)
+
+        top_bar = tk.Frame(container, bg="#1e293b", padx=16, pady=10)
+        top_bar.pack(fill="x", pady=(0, 8))
+
+        tk.Label(top_bar, text="🤖 AI Food Rescue & Spoilage Assistant", bg="#1e293b", fg="#ffffff", font=("Helvetica", 12, "bold")).pack(anchor="w")
+        tk.Label(top_bar, text="Ask questions about food perishability kinetics, safe shelf-life, temperature rules, packaging barriers, or FSSAI guidelines.",
+                 bg="#1e293b", fg="#94a3b8", font=("Helvetica", 8)).pack(anchor="w", pady=(1, 6))
+
+        # Quick Prompt Buttons
+        btn_row = tk.Frame(top_bar, bg="#1e293b")
+        btn_row.pack(fill="x")
+
+        prompts = [
+            ("🍲 Cooked Food Shelf-life", "How long does cooked food stay safe?"),
+            ("🌡️ Temperature Impact", "How does temperature affect microbial spoilage?"),
+            ("📦 Packaging Standards", "What packaging is best for food safety?"),
+            ("🚨 ML Urgency Tiers", "What does Red Alert urgency mean?"),
+            ("🥛 Dairy Handling", "What are dairy handling guidelines?")
+        ]
+
+        for p_label, p_text in prompts:
+            tk.Button(btn_row, text=p_label, bg="#334155", fg="#cbd5e1", font=("Helvetica", 8, "bold"),
+                      relief="flat", padx=8, pady=3, cursor="hand2",
+                      command=lambda t=p_text: self._ask_bot_prompt(t)).pack(side="left", padx=(0, 6))
+
+        # Chat Conversation Box
+        chat_frame = tk.Frame(container, bg="#1e293b", padx=12, pady=10)
+        chat_frame.pack(fill="both", expand=True, pady=(0, 8))
+
+        self.txt_bot = tk.Text(chat_frame, bg="#0f172a", fg="#ffffff", font=("Helvetica", 10),
+                               relief="flat", padx=12, pady=10, wrap="word", state="disabled")
+        self.txt_bot.pack(side="left", fill="both", expand=True)
+
+        scroll_bot = tk.Scrollbar(chat_frame, command=self.txt_bot.yview)
+        scroll_bot.pack(side="right", fill="y")
+        self.txt_bot.config(yscrollcommand=scroll_bot.set)
+
+        # Welcome message
+        self.txt_bot.config(state="normal")
+        self.txt_bot.insert(tk.END, "🤖 AI Assistant: Namaste! I am your AI Food Rescue & Spoilage Assistant.\nHow can I help you regarding food safety, temperature kinetics, or NGO collection today?\n\n")
+        self.txt_bot.config(state="disabled")
+
+        # Bottom Input Bar
+        bot_input_bar = tk.Frame(container, bg="#1e293b", padx=14, pady=10)
+        bot_input_bar.pack(fill="x")
+
+        self.entry_bot_query = tk.Entry(bot_input_bar, bg="#0f172a", fg="#ffffff", insertbackground="#ffffff",
+                                        font=("Helvetica", 10), relief="flat", highlightthickness=1, highlightbackground="#475569")
+        self.entry_bot_query.pack(side="left", fill="x", expand=True, padx=(0, 10), ipady=5)
+        self.entry_bot_query.bind("<Return>", lambda e: self._send_bot_query())
+
+        btn_ask = tk.Button(bot_input_bar, text="🤖 Ask AI", bg="#0284c7", fg="#ffffff", activebackground="#0369a1",
+                            font=("Helvetica", 9, "bold"), relief="flat", padx=16, pady=5, cursor="hand2", command=self._send_bot_query)
+        btn_ask.pack(side="right")
+
+    def _ask_bot_prompt(self, text):
+        self.entry_bot_query.delete(0, tk.END)
+        self.entry_bot_query.insert(0, text)
+        self._send_bot_query()
+
+    def _send_bot_query(self):
+        query = self.entry_bot_query.get().strip()
+        if not query:
+            return
+
+        self.txt_bot.config(state="normal")
+        self.txt_bot.insert(tk.END, f"👤 You: {query}\n\n")
+
+        reply = chat_service.get_ai_bot_response(query)
+        clean_reply = reply.replace("**", "").replace("🤖 ", "")
+        self.txt_bot.insert(tk.END, f"🤖 AI Assistant:\n{clean_reply}\n\n" + ("─"*60) + "\n\n")
+
+        self.txt_bot.see(tk.END)
+        self.txt_bot.config(state="disabled")
+        self.entry_bot_query.delete(0, tk.END)
 
     def _open_faculty_mode(self):
         eval_win = tk.Toplevel(self)

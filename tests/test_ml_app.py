@@ -113,5 +113,33 @@ class TestFoodRescueML(unittest.TestCase):
         self.assertIn('claimed_count', stats)
         self.assertIn('co2_saved_kg', stats)
 
+    def test_10_chat_service_send_and_retrieve(self):
+        import chat_service
+        msg = chat_service.send_chat_message(
+            donation_id="DON-101",
+            sender_role="Food Donor Partner",
+            sender_name="Taj Test Hotel",
+            sender_phone="9876543210",
+            message_text="Testing direct message from donor"
+        )
+        self.assertIsNotNone(msg)
+        self.assertTrue(msg['id'].startswith("MSG-"))
+
+        msgs = chat_service.get_messages_by_donation("DON-101")
+        self.assertGreaterEqual(len(msgs), 1)
+        found = any(m['message'] == "Testing direct message from donor" for m in msgs)
+        self.assertTrue(found)
+
+    def test_11_ai_chatbot_response(self):
+        import chat_service
+        reply_spoil = chat_service.get_ai_bot_response("How long will cooked food stay safe?")
+        self.assertIn("Spoilage & Shelf-Life", reply_spoil)
+
+        reply_temp = chat_service.get_ai_bot_response("How does ambient temperature and refrigeration work?")
+        self.assertIn("Temperature Impact", reply_temp)
+
+        reply_general = chat_service.get_ai_bot_response("Hello random greeting")
+        self.assertIn("Food Rescue AI Assistant", reply_general)
+
 if __name__ == '__main__':
     unittest.main()
