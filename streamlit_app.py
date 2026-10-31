@@ -133,23 +133,18 @@ with col_profile:
         st.session_state.authenticated = False
         st.rerun()
 
-# Portal Selector Pills
-portal_options = ["👨‍🍳 Food Donor Dashboard", "🏛️ NGO Shelter Dashboard", "🔬 ML Core & Benchmarks"]
-default_idx = 0 if st.session_state.active_portal == "donor" else (1 if st.session_state.active_portal == "ngo" else 2)
+# Primary Portal Selector (Only 2 Clean End-User Dashboards)
+portal_options = ["👨‍🍳 Food Donor Portal", "🏛️ NGO Shelter Portal"]
+default_idx = 0 if st.session_state.active_portal != "ngo" else 1
 
 selected_portal_label = st.radio(
-    "Select Active Dashboard:",
+    "Active Portal:",
     options=portal_options,
     index=default_idx,
     horizontal=True
 )
 
-if "Donor" in selected_portal_label:
-    st.session_state.active_portal = "donor"
-elif "NGO" in selected_portal_label:
-    st.session_state.active_portal = "ngo"
-else:
-    st.session_state.active_portal = "ml_core"
+st.session_state.active_portal = "donor" if "Donor" in selected_portal_label else "ngo"
 
 st.divider()
 
@@ -331,7 +326,7 @@ if st.session_state.active_portal == "donor":
 # =========================================================================
 # 2. NGO SHELTER DASHBOARD
 # =========================================================================
-elif st.session_state.active_portal == "ngo":
+else:
     st.subheader("🏛️ NGO Shelter & Food Rescue Portal - Live Rescue Dispatch Feed")
     st.write("NGOs, Orphanages, and Relief Shelters can claim surplus food ranked dynamically by Machine Learning Urgency.")
 
@@ -413,11 +408,11 @@ elif st.session_state.active_portal == "ngo":
             st.divider()
 
 # =========================================================================
-# 3. ML CORE & MODEL BENCHMARKS (For College Examination & Defense)
+# FACULTY & EXAMINER EVALUATION SUITE (Collapsible Mode)
 # =========================================================================
-else:
-    st.subheader("🔬 Machine Learning System Core & Architectural Benchmarks")
-    st.caption("College Major Project Academic Defense Suite • Supervised Microbial Kinetics Regressor")
+st.markdown("---")
+with st.expander("🔬 Faculty & Examiner Mode — ML Architecture, Benchmarks & Viva Guide", expanded=False):
+    st.info("💡 **Academic Evaluation Suite (For Professors & External Examiners):** This panel displays model performance metrics, comparative machine learning algorithms, dataset analysis, and project defense answers.")
 
     tab1, tab2, tab3, tab4 = st.tabs([
         "📊 Model Benchmarks",

@@ -319,9 +319,10 @@ class FoodRescueApp(tk.Tk):
                               bg="#1e293b", fg="#cbd5e1", font=("Helvetica", 8, "bold"), padx=8, pady=4)
         user_badge.pack(side="left", padx=(0, 6))
 
-        score_badge = tk.Label(right, text=f"★ R²: {ml_system.metrics.get('r2_score', 0.9413)*100:.1f}%",
-                               bg="#7c3aed", fg="#ffffff", font=("Helvetica", 8, "bold"), padx=8, pady=4)
-        score_badge.pack(side="left", padx=(0, 6))
+        btn_examiner = tk.Button(right, text="🔬 Faculty / Examiner Mode", bg="#334155", fg="#c084fc", activebackground="#475569",
+                                 font=("Helvetica", 8, "bold"), relief="flat", padx=10, pady=4, cursor="hand2",
+                                 command=self._open_faculty_mode)
+        btn_examiner.pack(side="left", padx=(0, 6))
 
         btn_logout = tk.Button(right, text="🔒 Logout", bg="#dc2626", fg="#ffffff", activebackground="#b91c1c",
                                font=("Helvetica", 8, "bold"), relief="flat", padx=8, pady=3, cursor="hand2",
@@ -342,23 +343,35 @@ class FoodRescueApp(tk.Tk):
         self.notebook.add(self.tab_ngo, text="  🏛️ NGO Shelter Portal  ")
         self._build_tab_ngo(self.tab_ngo)
 
-        # Tab 3: Model Performance & Comparison
-        self.tab_benchmark = ttk.Frame(self.notebook)
-        self.notebook.add(self.tab_benchmark, text="  📊 ML Model Benchmarks  ")
-        self._build_tab_benchmark(self.tab_benchmark)
-
-        # Tab 4: Dataset Explorer (5,000 Records)
-        self.tab_dataset = ttk.Frame(self.notebook)
-        self.notebook.add(self.tab_dataset, text="  📁 Dataset Explorer (5,000 Samples)  ")
-        self._build_tab_dataset(self.tab_dataset)
-
-        # Tab 5: College Viva Voce Defense Guide
-        self.tab_viva = ttk.Frame(self.notebook)
-        self.notebook.add(self.tab_viva, text="  🎓 Viva Voce Defense Guide  ")
-        self._build_tab_viva(self.tab_viva)
-
-        if hasattr(self, 'default_tab_idx') and self.default_tab_idx < 5:
+        if hasattr(self, 'default_tab_idx') and self.default_tab_idx < 2:
             self.notebook.select(self.default_tab_idx)
+
+    def _open_faculty_mode(self):
+        eval_win = tk.Toplevel(self)
+        eval_win.title("College Major Project - Faculty & Examiner Evaluation Suite")
+        eval_win.geometry("980x640")
+        eval_win.configure(bg="#0f172a")
+
+        header = tk.Frame(eval_win, bg="#1e293b", padx=16, pady=12)
+        header.pack(fill="x")
+        tk.Label(header, text="🔬 Faculty & External Examiner Evaluation Suite", bg="#1e293b", fg="#ffffff", font=("Helvetica", 13, "bold")).pack(anchor="w")
+        tk.Label(header, text="Academic ML Performance Verification • Arrhenius Microbial Kinetics • 5,000 Sample Benchmark",
+                 bg="#1e293b", fg="#94a3b8", font=("Helvetica", 8)).pack(anchor="w", pady=(1, 0))
+
+        nb = ttk.Notebook(eval_win)
+        nb.pack(fill="both", expand=True, padx=12, pady=12)
+
+        tab_bm = ttk.Frame(nb)
+        nb.add(tab_bm, text="  📊 ML Model Benchmarks  ")
+        self._build_tab_benchmark(tab_bm)
+
+        tab_ds = ttk.Frame(nb)
+        nb.add(tab_ds, text="  📁 Dataset Explorer (5,000 Samples)  ")
+        self._build_tab_dataset(tab_ds)
+
+        tab_viva = ttk.Frame(nb)
+        nb.add(tab_viva, text="  🎓 Viva Voce Defense Guide  ")
+        self._build_tab_viva(tab_viva)
 
     # =========================================================================
     # TAB 1: FOOD DONOR PORTAL
