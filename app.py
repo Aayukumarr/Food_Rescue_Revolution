@@ -28,6 +28,16 @@ class FoodRescueApp(tk.Tk):
         self.minsize(980, 700)
         self.configure(bg="#0f172a")
 
+        # Set Window App Icon
+        self.app_icon = None
+        icon_path = os.path.join(os.path.dirname(__file__), "assets", "app_icon_64.png")
+        if os.path.exists(icon_path):
+            try:
+                self.app_icon = tk.PhotoImage(file=icon_path)
+                self.iconphoto(False, self.app_icon)
+            except Exception:
+                pass
+
         self.dataset_records = []
         self._load_records()
 

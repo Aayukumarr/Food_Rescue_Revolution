@@ -17,7 +17,7 @@ import chat_service
 
 st.set_page_config(
     page_title="Food Rescue ML - Donor & NGO Dashboards",
-    page_icon="🍲",
+    page_icon="assets/app_icon.png" if os.path.exists("assets/app_icon.png") else "🍲",
     layout="wide"
 )
 
@@ -38,8 +38,15 @@ if "bot_history" not in st.session_state:
 # LOGIN GATEWAY (If Not Authenticated)
 # =========================================================================
 if not st.session_state.authenticated:
-    st.title("🍲 Food Rescue ML - Smart Food Salvage System")
-    st.caption("College Major Project • Machine Learning-Powered Perishability Predictor & Dispatch Hub")
+    col_l_icon, col_l_text = st.columns([1, 11])
+    with col_l_icon:
+        if os.path.exists("assets/app_icon.png"):
+            st.image("assets/app_icon.png", width=75)
+        else:
+            st.write("🍲")
+    with col_l_text:
+        st.title("Food Rescue ML - Smart Food Salvage System")
+        st.caption("College Major Project • Machine Learning-Powered Perishability Predictor & Dispatch Hub")
 
     col_space_l, col_card, col_space_r = st.columns([1, 2, 1])
 
@@ -127,9 +134,15 @@ if not st.session_state.authenticated:
 # =========================================================================
 
 # Top Navigation Bar & User Profile
-col_title, col_profile = st.columns([8, 3])
+col_icon, col_title, col_profile = st.columns([1, 7, 3])
+with col_icon:
+    if os.path.exists("assets/app_icon.png"):
+        st.image("assets/app_icon.png", width=70)
+    else:
+        st.write("🍲")
+
 with col_title:
-    st.title("🍲 Food Rescue ML System")
+    st.title("Food Rescue ML System")
     st.caption("College Major Project • Supervised Random Forest Machine Learning (100% Pure Python)")
 
 with col_profile:
