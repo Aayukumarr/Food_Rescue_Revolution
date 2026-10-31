@@ -93,15 +93,54 @@ DEFAULT_DONATIONS = [
     }
 ]
 
+def sanitize_donation(d):
+    if not isinstance(d, dict):
+        return {}
+    d['id'] = d.get('id', 'DON-100')
+    d['food_name'] = d.get('food_name', 'Surplus Cooked Meals')
+    d['category'] = d.get('category', 'cooked_meals')
+    d['food_type'] = d.get('food_type', 'veg')
+    try:
+        d['quantity_kg'] = float(d.get('quantity_kg', 15.0))
+    except (ValueError, TypeError):
+        d['quantity_kg'] = 15.0
+    try:
+        d['servings'] = int(d.get('servings', int(d['quantity_kg'] * 3)))
+    except (ValueError, TypeError):
+        d['servings'] = 45
+    d['donor_name'] = d.get('donor_name', 'Food Donor')
+    d['donor_phone'] = str(d.get('donor_phone', '9876543210'))
+    d['donor_location'] = d.get('donor_location', 'Central Delhi Distribution Hub')
+    try:
+        d['ambient_temp_c'] = float(d.get('ambient_temp_c', 30.0))
+    except (ValueError, TypeError):
+        d['ambient_temp_c'] = 30.0
+    d['storage_condition'] = d.get('storage_condition', 'ambient_room')
+    try:
+        d['prepared_hours_ago'] = float(d.get('prepared_hours_ago', 2.0))
+    except (ValueError, TypeError):
+        d['prepared_hours_ago'] = 2.0
+    try:
+        d['predicted_safe_hours'] = float(d.get('predicted_safe_hours', 4.0))
+    except (ValueError, TypeError):
+        d['predicted_safe_hours'] = 4.0
+    d['urgency_tier'] = d.get('urgency_tier', 'NORMAL')
+    d['status'] = d.get('status', 'AVAILABLE')
+    d['claimed_by'] = d.get('claimed_by', None)
+    d['claimed_phone'] = d.get('claimed_phone', None)
+    d['timestamp'] = d.get('timestamp', 'Today, 12:00 PM')
+    return d
+
 def load_donations():
     if os.path.exists(DATA_FILE):
         try:
             with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                raw_list = json.load(f)
+                return [sanitize_donation(d) for d in raw_list]
         except Exception:
             pass
     save_donations(DEFAULT_DONATIONS)
-    return list(DEFAULT_DONATIONS)
+    return [sanitize_donation(d) for d in DEFAULT_DONATIONS]
 
 def save_donations(donations):
     try:
@@ -114,12 +153,13 @@ def save_donations(donations):
 def add_new_donation(data):
     donations = load_donations()
     new_id = f"DON-{len(donations) + 101}"
-    data['id'] = new_id
-    data['status'] = 'AVAILABLE'
-    data['claimed_by'] = None
-    data['claimed_phone'] = None
-    data['timestamp'] = time.strftime("Today, %I:%M %p")
-    donations.insert(0, data)
+    clean_data = sanitize_donation(dict(data))
+    clean_data['id'] = new_id
+    clean_data['status'] = 'AVAILABLE'
+    clean_data['claimed_by'] = None
+    clean_data['claimed_phone'] = None
+    clean_data['timestamp'] = time.strftime("Today, %I:%M %p")
+    donations.insert(0, clean_data)
     save_donations(donations)
     return new_id
 
@@ -155,3 +195,4 @@ def get_stats():
         'total_servings': total_servings,
         'co2_saved_kg': co2_saved_kg
     }
+

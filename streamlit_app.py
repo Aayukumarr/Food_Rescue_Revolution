@@ -304,14 +304,25 @@ if st.session_state.active_portal == "donor":
     all_donations = donations_store.load_donations()
 
     for item in all_donations:
+        item_id = item.get('id', 'DON-000')
+        f_name = item.get('food_name', 'Surplus Cooked Food')
+        q_kg = item.get('quantity_kg', 10.0)
+        serv = item.get('servings', int(q_kg * 3))
+        d_name = item.get('donor_name', 'Food Donor')
+        d_phone = item.get('donor_phone', '9876543210')
+        d_loc = item.get('donor_location', 'Central Hub')
+        s_hours = item.get('predicted_safe_hours', 4.0)
+        u_tier = item.get('urgency_tier', 'NORMAL')
+        status = item.get('status', 'AVAILABLE')
+
         with st.container():
             col_info, col_status = st.columns([8, 3])
             with col_info:
-                st.markdown(f"#### 🍲 {item['food_name']} ({item['quantity_kg']} kg • ~{item['servings']} servings)")
-                st.caption(f"Donor: **{item['donor_name']}** (+91 {item['donor_phone']}) • Location: {item['donor_location']} • Listed: {item.get('timestamp', 'Today')}")
-                st.write(f"Safe Shelf-Life: **{item['predicted_safe_hours']} Hours** | Urgency: `{item['urgency_tier']}`")
+                st.markdown(f"#### 🍲 {f_name} ({q_kg} kg • ~{serv} servings)")
+                st.caption(f"Donor: **{d_name}** (+91 {d_phone}) • Location: {d_loc} • Listed: {item.get('timestamp', 'Today')}")
+                st.write(f"Safe Shelf-Life: **{s_hours} Hours** | Urgency: `{u_tier}`")
             with col_status:
-                if item['status'] == 'AVAILABLE':
+                if status == 'AVAILABLE':
                     st.success("🟢 AVAILABLE\nWaiting for NGO Pickup")
                 else:
                     st.warning(f"🤝 CLAIMED\nBy {item.get('claimed_by', 'NGO Shelter')}\nPhone: +91 {item.get('claimed_phone', '9899011223')}")
@@ -358,11 +369,20 @@ elif st.session_state.active_portal == "ngo":
     st.markdown("### 🚨 Live Surplus Food Rescue Feed (ML Ranked)")
 
     for item in display_list:
+        item_id = item.get('id', 'DON-000')
+        f_name = item.get('food_name', 'Surplus Cooked Food')
+        q_kg = item.get('quantity_kg', 10.0)
+        serv = item.get('servings', int(q_kg * 3))
+        d_name = item.get('donor_name', 'Food Donor')
+        d_phone = item.get('donor_phone', '9876543210')
+        d_loc = item.get('donor_location', 'Central Hub')
+        s_hours = item.get('predicted_safe_hours', 4.0)
+        tier = item.get('urgency_tier', 'NORMAL')
+        status = item.get('status', 'AVAILABLE')
+
         with st.container():
             col_main, col_action = st.columns([7, 4])
             with col_main:
-                # Urgency badge
-                tier = item.get('urgency_tier', 'NORMAL')
                 if tier == 'RED_ALERT':
                     badge_str = "🚨 RED ALERT — Critical Spoilage Risk (< 4 hrs safe)"
                 elif tier == 'HIGH_PRIORITY':
@@ -370,25 +390,25 @@ elif st.session_state.active_portal == "ngo":
                 else:
                     badge_str = "🟢 NORMAL — Safe Shelf-Life (> 12 hrs safe)"
 
-                st.markdown(f"### {item['food_name']}")
+                st.markdown(f"### {f_name}")
                 st.caption(badge_str)
-                st.write(f"**Quantity:** {item['quantity_kg']} kg (~{item['servings']} hungry people fed)")
-                st.write(f"**Donor:** {item['donor_name']} (+91 {item['donor_phone']})")
-                st.write(f"**Pickup Address:** {item['donor_location']}")
-                st.write(f"**ML Predicted Safe Hours Remaining:** ⏳ **{item['predicted_safe_hours']} Hours**")
+                st.write(f"**Quantity:** {q_kg} kg (~{serv} hungry people fed)")
+                st.write(f"**Donor:** {d_name} (+91 {d_phone})")
+                st.write(f"**Pickup Address:** {d_loc}")
+                st.write(f"**ML Predicted Safe Hours Remaining:** ⏳ **{s_hours} Hours**")
 
             with col_action:
-                if item['status'] == 'AVAILABLE':
+                if status == 'AVAILABLE':
                     st.info("Status: **AVAILABLE FOR PICKUP**")
-                    ngo_name_input = st.text_input("Your NGO Name", value="Robin Hood Army", key=f"ngo_{item['id']}")
-                    ngo_phone_input = st.text_input("Volunteer Phone", value=st.session_state.user_phone, key=f"phone_{item['id']}")
+                    ngo_name_input = st.text_input("Your NGO Name", value="Robin Hood Army", key=f"ngo_{item_id}")
+                    ngo_phone_input = st.text_input("Volunteer Phone", value=st.session_state.user_phone, key=f"phone_{item_id}")
                     
-                    if st.button(f"🤝 Claim Donation & Dispatch Volunteer", key=f"btn_{item['id']}", type="primary", use_container_width=True):
-                        donations_store.claim_donation_by_ngo(item['id'], ngo_name_input, ngo_phone_input)
-                        st.success(f"🎉 Success! Donation {item['id']} claimed. Contact donor at +91 {item['donor_phone']} to arrange pickup.")
+                    if st.button(f"🤝 Claim Donation & Dispatch Volunteer", key=f"btn_{item_id}", type="primary", use_container_width=True):
+                        donations_store.claim_donation_by_ngo(item_id, ngo_name_input, ngo_phone_input)
+                        st.success(f"🎉 Success! Donation {item_id} claimed. Contact donor at +91 {d_phone} to arrange pickup.")
                         st.rerun()
                 else:
-                    st.success(f"✅ **CLAIMED & RESCUED**\n\nClaimed by: **{item.get('claimed_by')}**\nVolunteer Phone: **+91 {item.get('claimed_phone')}**")
+                    st.success(f"✅ **CLAIMED & RESCUED**\n\nClaimed by: **{item.get('claimed_by', 'NGO Shelter')}**\nVolunteer Phone: **+91 {item.get('claimed_phone', 'N/A')}**")
 
             st.divider()
 

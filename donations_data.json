@@ -1,20 +1,5 @@
 [
   {
-    "food_name": "Test Rice & Dal",
-    "category": "cooked_meals",
-    "quantity_kg": 15.0,
-    "servings": 45,
-    "donor_name": "Test Caterer",
-    "donor_phone": "9988776655",
-    "predicted_safe_hours": 5.0,
-    "urgency_tier": "HIGH_PRIORITY",
-    "id": "DON-105",
-    "status": "CLAIMED",
-    "claimed_by": "Robin Hood Test NGO",
-    "claimed_phone": "9899011223",
-    "timestamp": "Today, 02:56 AM"
-  },
-  {
     "id": "DON-101",
     "food_name": "Wedding Buffet Mixed Veg & Pulao",
     "category": "cooked_meals",
