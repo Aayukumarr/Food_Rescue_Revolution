@@ -79,5 +79,39 @@ class TestFoodRescueML(unittest.TestCase):
         self.assertFalse(valid)
         self.assertIn("Incorrect", msg)
 
+    def test_08_donations_store_add_and_claim(self):
+        import donations_store
+        new_id = donations_store.add_new_donation({
+            "food_name": "Test Rice & Dal",
+            "category": "cooked_meals",
+            "quantity_kg": 15.0,
+            "servings": 45,
+            "donor_name": "Test Caterer",
+            "donor_phone": "9988776655",
+            "predicted_safe_hours": 5.0,
+            "urgency_tier": "HIGH_PRIORITY"
+        })
+        self.assertTrue(new_id.startswith("DON-"))
+
+        # Claim the donation
+        claimed = donations_store.claim_donation_by_ngo(new_id, "Robin Hood Test NGO", "9899011223")
+        self.assertTrue(claimed)
+
+        # Verify claim status
+        donations = donations_store.load_donations()
+        target = next((d for d in donations if d['id'] == new_id), None)
+        self.assertIsNotNone(target)
+        self.assertEqual(target['status'], "CLAIMED")
+        self.assertEqual(target['claimed_by'], "Robin Hood Test NGO")
+
+    def test_09_donations_store_stats(self):
+        import donations_store
+        stats = donations_store.get_stats()
+        self.assertIn('total_listings', stats)
+        self.assertGreaterEqual(stats['total_listings'], 1)
+        self.assertIn('available_count', stats)
+        self.assertIn('claimed_count', stats)
+        self.assertIn('co2_saved_kg', stats)
+
 if __name__ == '__main__':
     unittest.main()
